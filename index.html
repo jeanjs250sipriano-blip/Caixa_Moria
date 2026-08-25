@@ -2848,29 +2848,78 @@ function validarLancamento(desc, val, dataStr) {
 }
 
 // ── Helpers de formulario: mascara de valor e data em inputs ────────────
-function attachValorMask(input) {
-    input.addEventListener("input", () => {
-        let raw = input.value.replace(/\./g, "").replace(",", "C");
-        let digitsOnly = "", hasDecimal = false, decimalPart = "";
-        for (const ch of raw) {
-            if (/\d/.test(ch)) {
-                if (hasDecimal) { if (decimalPart.length < 2) decimalPart += ch; }
-                else digitsOnly += ch;
-            } else if (ch === "C" && !hasDecimal) {
-                hasDecimal = true;
-            }
+// Aceita vírgula OU ponto como decimal (teclado mobile costuma mandar ".").
+// Exibe sempre no padrão BR: 1.234,56
+function _parseValorDigitado(str) {
+    let raw = String(str || "").replace(/[^\d.,]/g, "");
+    if (raw === "," || raw === ".") return { intDigits: "0", decDigits: "", hasDecimal: true };
+
+    // Com vírgula → padrão BR (ponto = milhar, vírgula = decimal)
+    if (raw.indexOf(",") >= 0) {
+        const i = raw.lastIndexOf(",");
+        return {
+            intDigits: raw.slice(0, i).replace(/\D/g, ""),
+            decDigits: raw.slice(i + 1).replace(/\D/g, "").slice(0, 2),
+            hasDecimal: true,
+        };
+    }
+
+    // Sem vírgula: um único ponto com 0–2 dígitos depois = decimal (teclado mobile)
+    // Ex.: "10.", "10.5", "10.50"  |  "1.234" (3 casas) = milhar, não decimal
+    const firstDot = raw.indexOf(".");
+    const lastDot = raw.lastIndexOf(".");
+    if (firstDot >= 0 && firstDot === lastDot) {
+        const after = raw.slice(lastDot + 1).replace(/\D/g, "");
+        if (after.length <= 2) {
+            return {
+                intDigits: raw.slice(0, lastDot).replace(/\D/g, ""),
+                decDigits: after,
+                hasDecimal: true,
+            };
         }
-        if (!digitsOnly && !hasDecimal) { return; }
-        let inteiro;
-        try { inteiro = parseInt(digitsOnly || "0", 10); } catch (e) { inteiro = 0; }
-        let inteiroFmt = String(inteiro).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        const formatted = hasDecimal ? `${inteiroFmt},${decimalPart}` : inteiroFmt;
-        if (formatted !== input.value) input.value = formatted;
+    }
+
+    return { intDigits: raw.replace(/\D/g, ""), decDigits: "", hasDecimal: false };
+}
+
+function attachValorMask(input) {
+    if (input.dataset.valorMaskBound === "1") return;
+    input.dataset.valorMaskBound = "1";
+
+    input.addEventListener("input", () => {
+        const selStart = input.selectionStart;
+        const oldLen = input.value.length;
+        const endsWithSep = /[.,]$/.test(input.value);
+
+        let { intDigits, decDigits, hasDecimal } = _parseValorDigitado(input.value);
+
+        intDigits = intDigits.replace(/^0+(?=\d)/, "");
+        if (intDigits === "" && hasDecimal) intDigits = "0";
+        if (intDigits === "" && !hasDecimal) {
+            input.value = "";
+            return;
+        }
+
+        // Se digitou separador no fim, mantém casas decimais "abertas"
+        if (endsWithSep) hasDecimal = true;
+
+        const inteiroFmt = intDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        let formatted = hasDecimal ? `${inteiroFmt},${decDigits}` : inteiroFmt;
+
+        if (formatted !== input.value) {
+            input.value = formatted;
+            try {
+                const pos = Math.max(0, selStart + (formatted.length - oldLen));
+                input.setSelectionRange(pos, pos);
+            } catch (e) { /* ignore */ }
+        }
     });
 }
 function getValorFromInput(input) {
     try {
-        return parseFloat(input.value.replace(/\./g, "").replace(",", ".")) || 0;
+        const v = (input.value || "").trim();
+        if (!v || v === ",") return 0;
+        return parseFloat(v.replace(/\./g, "").replace(",", ".")) || 0;
     } catch (e) { return 0; }
 }
 function setValorInput(input, value) {
