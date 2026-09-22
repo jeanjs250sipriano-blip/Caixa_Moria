@@ -6,38 +6,38 @@
 <title>Caixa Moriah — Sistema Financeiro Igreja Moriah</title>
 <style>
 /* ══════════════════════════════════════════════════════════════════════
-   STYLES.CSS — Caixa Moriah (UI modernizada)
-   Paleta base preservada do app Kivy original.
-   PDF NÃO usa este CSS — layout do PDF permanece intacto em pdf.js.
+   STYLES.CSS — Caixa Moriah (UI moderna · tema claro)
+   PDF NÃO usa este CSS — layout do PDF permanece intacto em pdf.js / PDFService.
    ══════════════════════════════════════════════════════════════════════ */
 
 :root {
-    --bg:        rgb(8, 12, 26);
-    --surface:   rgb(14, 19, 36);
-    --card:      rgb(22, 29, 50);
-    --card2:     rgb(28, 36, 60);
-    --accent:    rgb(59, 130, 245);
-    --accent2:   rgb(37, 99, 235);
-    --accent-soft: rgba(59, 130, 245, 0.15);
-    --green:     rgb(34, 197, 94);
-    --green2:    rgb(22, 163, 74);
-    --green3:    rgb(12, 58, 32);
-    --red:       rgb(248, 113, 113);
-    --red2:      rgb(185, 28, 28);
-    --red3:      rgb(60, 16, 16);
-    --orange:    rgb(251, 146, 60);
-    --gold:      rgb(234, 179, 8);
-    --muted:     rgb(100, 116, 139);
-    --text:      rgb(241, 245, 249);
-    --textsub:   rgb(148, 163, 184);
-    --border:    rgb(36, 52, 84);
-    --border-soft: rgba(148, 163, 184, 0.12);
-    --pix-bg:    rgb(15, 35, 72);
-    --dep-bg:    rgb(36, 24, 58);
-    --culto-bg:  rgb(20, 28, 56);
-    --ceia-bg:   rgb(48, 32, 12);
-    --edit-btn:  rgb(40, 56, 98);
-    --shadow:    0 4px 24px rgba(0, 0, 0, 0.35);
+    /* Tema claro moderno — PDF NÃO usa estas variáveis */
+    --bg:        #F1F5F9;
+    --surface:   #FFFFFF;
+    --card:      #FFFFFF;
+    --card2:     #F8FAFC;
+    --accent:    #2563EB;
+    --accent2:   #1D4ED8;
+    --accent-soft: rgba(37, 99, 235, 0.10);
+    --green:     #16A34A;
+    --green2:    #15803D;
+    --green3:    #DCFCE7;
+    --red:       #DC2626;
+    --red2:      #B91C1C;
+    --red3:      #FEE2E2;
+    --orange:    #EA580C;
+    --gold:      #CA8A04;
+    --muted:     #94A3B8;
+    --text:      #0F172A;
+    --textsub:   #64748B;
+    --border:    #E2E8F0;
+    --border-soft: rgba(15, 23, 42, 0.08);
+    --pix-bg:    #EFF6FF;
+    --dep-bg:    #F5F3FF;
+    --culto-bg:  #F1F5F9;
+    --ceia-bg:   #FFFBEB;
+    --edit-btn:  #E2E8F0;
+    --shadow:    0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
     --radius:    14px;
     --radius-sm: 10px;
 }
@@ -105,6 +105,124 @@ html, body {
 }
 .hdr .sub { font-size: 12px; color: rgba(255,255,255,0.85); margin: 0; }
 .hdr-info { display: flex; flex-direction: column; gap: 2px; }
+
+.btn-gear {
+    margin-left: auto;
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+    padding: 0;
+}
+.btn-gear:active { background: rgba(255,255,255,0.28); }
+
+.hero-saldo {
+    background: var(--card);
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    padding: 20px 18px 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    margin-bottom: 14px;
+}
+.hero-saldo .hero-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--textsub);
+    margin-bottom: 6px;
+}
+.hero-saldo .hero-value {
+    font-size: 28px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+.hero-saldo .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+}
+.hero-saldo .hero-cell {
+    text-align: center;
+}
+.hero-saldo .hero-cell .k {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--textsub);
+    margin-bottom: 2px;
+}
+.hero-saldo .hero-cell .v {
+    font-size: 15px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+.hero-saldo .hero-repasse {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+.hero-saldo .hero-repasse .k { color: var(--textsub); font-weight: 600; }
+.hero-saldo .hero-repasse .v { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.settings-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+.settings-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--card2);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 16px 14px;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+.settings-item:active { background: var(--accent-soft); border-color: rgba(37,99,235,0.25); }
+.settings-item .ico {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: var(--accent-soft);
+}
+.settings-item .txt { flex: 1; min-width: 0; }
+.settings-item .txt .t1 { font-size: 15px; font-weight: 700; }
+.settings-item .txt .t2 { font-size: 12px; color: var(--textsub); margin-top: 2px; }
+.settings-item .chev { color: var(--muted); font-size: 18px; font-weight: 700; }
+
+.home-period {
+    text-align: center;
+    font-size: 12px;
+    color: var(--textsub);
+    margin: -4px 0 12px;
+}
+
 .btn-voltar {
     background: rgba(255,255,255,0.16);
     color: #fff;
@@ -204,7 +322,7 @@ html, body {
     width: 100%;
     letter-spacing: 0.02em;
     transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
 }
 .btn:active {
     transform: scale(0.98);
@@ -232,6 +350,7 @@ html, body {
     background: var(--card2);
     border: 1px solid var(--border);
     box-shadow: none;
+    color: var(--text);
 }
 .btn-gold {
     background: linear-gradient(180deg, rgb(250, 204, 21), var(--gold));
@@ -248,15 +367,16 @@ html, body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    background: rgba(14, 19, 36, 0.92);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 8px 10px;
     flex-shrink: 0;
     position: relative;
     z-index: 50;
-    border-top: 1px solid var(--border-soft);
+    border-top: 1px solid var(--border);
     padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
 }
 .nav-bar button {
     background: transparent;
@@ -273,8 +393,8 @@ html, body {
 }
 .nav-bar button.active {
     background: var(--accent-soft);
-    color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(59, 130, 245, 0.35);
+    color: var(--accent2);
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.25);
 }
 
 /* ── Mes list ──────────────────────────────────────────────────────── */
@@ -344,8 +464,8 @@ html, body {
 }
 .entry-spacer { width: 36px; flex-shrink: 0; }
 
-.bg-fixo-ent { background: linear-gradient(90deg, var(--green3), rgba(12,58,32,0.4)); }
-.bg-fixo-sai { background: linear-gradient(90deg, var(--red3), rgba(60,16,16,0.4)); }
+.bg-fixo-ent { background: linear-gradient(90deg, var(--green3), #BBF7D0); }
+.bg-fixo-sai { background: linear-gradient(90deg, var(--red3), #FECACA); }
 .bg-pix { background: var(--pix-bg); }
 .bg-dep { background: var(--dep-bg); }
 .bg-auto { background: var(--dep-bg); }
@@ -389,7 +509,7 @@ html, body {
 }
 .culto-nome { flex: 1; font-size: 13px; }
 .culto-nome.ceia { font-weight: 700; color: var(--gold); }
-.culto-nome.quarta { color: rgb(147, 197, 253); }
+.culto-nome.quarta { color: #1D4ED8; }
 
 /* ── Dep grupos ────────────────────────────────────────────────────── */
 .grp-label {
@@ -428,7 +548,7 @@ html, body {
     flex-direction: column;
     animation: slideUp 0.22s ease;
     border-top: 1px solid var(--border-soft);
-    box-shadow: 0 -8px 40px rgba(0,0,0,0.45);
+    box-shadow: 0 -8px 40px rgba(15, 23, 42, 0.12);
 }
 @keyframes slideUp {
     from { transform: translateY(40px); opacity: 0.5; }
@@ -483,7 +603,7 @@ select.field:focus,
 textarea.field:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
-    background: rgb(32, 42, 70);
+    background: #FFFFFF;
 }
 
 /* valor em destaque nos formulários */
@@ -524,8 +644,8 @@ input.data-input {
     left: 50%;
     bottom: 12%;
     transform: translateX(-50%);
-    background: rgba(15, 20, 40, 0.96);
-    border: 1px solid var(--border-soft);
+    background: #0F172A;
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
     padding: 13px 18px;
     font-size: 13px;
@@ -534,10 +654,11 @@ input.data-input {
     max-width: 88%;
     text-align: center;
     white-space: pre-line;
-    box-shadow: var(--shadow);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.25);
+    color: #F8FAFC;
 }
-.toast.ok { color: var(--green); }
-.toast.err { color: var(--red); }
+.toast.ok { color: #4ADE80; }
+.toast.err { color: #F87171; }
 
 /* ── Misc ──────────────────────────────────────────────────────────── */
 .muted-msg {
@@ -2754,11 +2875,11 @@ function renderSectionHeader(title, colorVar) {
     return `<div class="section-header" style="background:${_bgTint(colorVar)};color:${colorVar}">${escapeHtml(title)}</div>`;
 }
 function _bgTint(colorCss) {
-    // aplica um tint escuro por trás do texto (equivalente a color*0.22 no Kivy)
+    // tema claro: fundo pastel suave a partir da cor do texto
     const m = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(colorCss);
-    if (!m) return "rgba(255,255,255,0.08)";
+    if (!m) return "rgba(37,99,235,0.08)";
     const [r, g, b] = [m[1], m[2], m[3]].map(Number);
-    return `rgba(${Math.round(r*0.22)}, ${Math.round(g*0.22)}, ${Math.round(b*0.22)}, 1)`;
+    return `rgba(${r}, ${g}, ${b}, 0.12)`;
 }
 
 // ── ENTRY ROW ────────────────────────────────────────────────────────────
@@ -2992,6 +3113,8 @@ const App = {
             case "relatorio": el.innerHTML = Screens.relatorio(this.params.chave, this.params.origem); break;
             case "config": el.innerHTML = Screens.config(); break;
             case "pdf": el.innerHTML = Screens.pdf(); break;
+            case "cong_mes_list": el.innerHTML = Screens.congMesList(); break;
+            case "cong_mes_detalhe": el.innerHTML = Screens.congMesDetalhe(this.params.chave); break;
             default: el.innerHTML = Screens.home();
         }
         this._afterRender();
@@ -3041,6 +3164,66 @@ const App = {
 };
 
 // ══════════════════════════════════════════════════════════════════════════
+// CONG.JS — Caixa Congregacao: caixa independente, separado do Caixa Moriah.
+// Persistencia propria via localStorage (nao usa IndexedDB/FinanceService).
+// ══════════════════════════════════════════════════════════════════════════
+
+const CONG_STORAGE_KEY = "caixaCongregacao_entries_v1";
+
+const CongService = {
+    _load() {
+        try {
+            const raw = localStorage.getItem(CONG_STORAGE_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            return Array.isArray(list) ? list : [];
+        } catch (e) { return []; }
+    },
+    _save(list) {
+        try { localStorage.setItem(CONG_STORAGE_KEY, JSON.stringify(list)); } catch (e) { /* ignore */ }
+    },
+    chaveDeData(dataStr) {
+        return String(dataStr || "").slice(0, 7);
+    },
+    chaveAtual() {
+        return this.chaveDeData(hojeStr());
+    },
+    addEntry(type, desc, value, dataStr) {
+        const list = this._load();
+        const entry = { id: gerarId(), type, desc, value, date: dataStr, chave: this.chaveDeData(dataStr) };
+        list.push(entry);
+        this._save(list);
+        return entry;
+    },
+    getEntry(id) {
+        return this._load().find(e => e.id === id) || null;
+    },
+    editEntry(id, { desc, value, dataStr }) {
+        const list = this._load();
+        const idx = list.findIndex(e => e.id === id);
+        if (idx === -1) return false;
+        list[idx] = { ...list[idx], desc, value, date: dataStr, chave: this.chaveDeData(dataStr) };
+        this._save(list);
+        return true;
+    },
+    deleteEntry(id) {
+        this._save(this._load().filter(e => e.id !== id));
+    },
+    entriesDoMes(chave) {
+        return this._load().filter(e => e.chave === chave);
+    },
+    totaisDoMes(chave) {
+        const entries = this.entriesDoMes(chave);
+        const ent = entries.filter(e => e.type === "entrada").reduce((s, e) => s + e.value, 0);
+        const sai = entries.filter(e => e.type === "saida").reduce((s, e) => s + e.value, 0);
+        return { ent, sai, saldo: ent - sai };
+    },
+    chavesComMovimentacao() {
+        const set = new Set(this._load().map(e => e.chave));
+        return Array.from(set).sort();
+    },
+};
+
+// ══════════════════════════════════════════════════════════════════════════
 // SCREENS — construtores de tela (retornam HTML)
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -3052,31 +3235,149 @@ const Screens = {
         const repasse = svc.calculateRepasse(chave);
         const corSal = sal >= 0 ? "var(--green)" : "var(--red)";
         const corRep = repasse >= 0 ? "var(--green)" : "var(--red)";
+        let anoC, mesC;
+        try { anoC = parseInt(chave.slice(0,4),10); mesC = parseInt(chave.slice(5),10); }
+        catch (e) { const t = new Date(); anoC = t.getFullYear(); mesC = t.getMonth()+1; }
+        const ini = inicioCaixa(anoC, mesC), fim = fimCaixa(anoC, mesC);
 
         return `
-        <div class="hdr"><h1>PAINEL  —  ${escapeHtml(formatarChave(chave))}</h1></div>
+        <div class="hdr">
+            <div class="hdr-info" style="flex:1;min-width:0">
+                <h1>PAINEL</h1>
+                <div class="sub">${escapeHtml(formatarChave(chave))}</div>
+            </div>
+            <button class="btn-gear" data-action="menuConfig" title="Configuracoes" aria-label="Configuracoes">⚙</button>
+        </div>
         <div class="scroll">
-            ${renderSectionHeader("CAIXA GERAL", "rgb(59, 130, 245)")}
-            <div class="card">
-                <div class="linha-painel"><span style="color:var(--green)">Entradas</span><span style="color:var(--green)">${formatarMoeda(entT)}</span></div>
-                <div class="separador"></div>
-                <div class="linha-painel"><span style="color:var(--red)">Saidas</span><span style="color:var(--red)">-${formatarMoeda(saiT)}</span></div>
-                <div class="separador"></div>
-                <div class="linha-painel bold"><span>Saldo</span><span style="color:${corSal}">${formatarMoeda(sal)}</span></div>
-                <div class="separador gold"></div>
-                <div class="linha-painel bold"><span>Repasse</span><span style="color:${corRep}">${formatarMoeda(repasse)}</span></div>
+            <div class="home-period">${_fmtDataBr(ini)} — ${_fmtDataBr(fim)}</div>
+            <div class="hero-saldo">
+                <div class="hero-label">Saldo do mes</div>
+                <div class="hero-value" style="color:${corSal}">${formatarMoeda(sal)}</div>
+                <div class="hero-grid">
+                    <div class="hero-cell">
+                        <div class="k">Entradas</div>
+                        <div class="v" style="color:var(--green)">${formatarMoeda(entT)}</div>
+                    </div>
+                    <div class="hero-cell">
+                        <div class="k">Saidas</div>
+                        <div class="v" style="color:var(--red)">${formatarMoeda(saiT)}</div>
+                    </div>
+                </div>
+                <div class="hero-repasse">
+                    <span class="k">Repasse</span>
+                    <span class="v" style="color:${corRep}">${formatarMoeda(repasse)}</span>
+                </div>
             </div>
             <div class="btn-row">
                 <button class="btn btn-green" data-action="selecaoEntrada">+ ENTRADA</button>
                 <button class="btn btn-red" data-action="saida">- SAIDA</button>
             </div>
-            <div class="btn-row">
-                <button class="btn btn-border btn-small" data-nav="config">Config.</button>
-                <button class="btn btn-small" style="background:rgb(36,56,102)" data-action="abrir-relatorio" data-chave="${chave}" data-origem="home">Relatorio</button>
-            </div>
-            ${Screens._painelBackup()}
+            ${Screens._painelCongregacao()}
         </div>
         ${renderNavBar("home")}`;
+    },
+
+    _painelCongregacao() {
+        const chaveCong = CongService.chaveAtual();
+        const { ent, sai, saldo } = CongService.totaisDoMes(chaveCong);
+        const corSal = saldo >= 0 ? "var(--green)" : "var(--red)";
+        return `
+        <div class="card" style="margin-top:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px">
+                <div style="font-size:15px;font-weight:800;letter-spacing:0.01em">Caixa Congregacao</div>
+                <button class="btn btn-border btn-small" style="width:auto;padding:9px 14px" data-nav="cong_mes_list">Caixa</button>
+            </div>
+            <div class="small-note" style="margin-bottom:8px">Relatorio do mes atual — ${escapeHtml(formatarChave(chaveCong))}</div>
+            <div class="linha-painel bold">
+                <span>Saldo do mes</span>
+                <span style="color:${corSal}">${formatarMoeda(saldo)}</span>
+            </div>
+            <div class="separador" style="margin:2px 0 6px"></div>
+            <div class="hero-grid" style="margin-top:0;padding-top:0;border-top:none">
+                <div class="hero-cell">
+                    <div class="k">Entradas</div>
+                    <div class="v" style="color:var(--green)">${formatarMoeda(ent)}</div>
+                </div>
+                <div class="hero-cell">
+                    <div class="k">Saidas</div>
+                    <div class="v" style="color:var(--red)">${formatarMoeda(sai)}</div>
+                </div>
+            </div>
+            <div class="btn-row" style="margin-top:12px">
+                <button class="btn btn-green" data-action="congEntrada">+ ENTRADA</button>
+                <button class="btn btn-red" data-action="congSaida">- SAIDA</button>
+            </div>
+        </div>`;
+    },
+
+    congMesList() {
+        const chaves = CongService.chavesComMovimentacao();
+        let listaHtml = "";
+        if (!chaves.length) {
+            listaHtml = `<div class="muted-msg">Nenhum lancamento ainda na Caixa Congregacao.</div>`;
+        } else {
+            for (const chave of [...chaves].reverse()) {
+                const { saldo } = CongService.totaisDoMes(chave);
+                const cor = saldo >= 0 ? "var(--green)" : "var(--red)";
+                listaHtml += `
+                <button class="mes-btn" data-action="abrir-mes" data-chave="${chave}" data-destino="cong_mes_detalhe">
+                    <span>${escapeHtml(formatarChave(chave))}</span>
+                    <span class="saldo" style="color:${cor}">${formatarMoeda(saldo)}</span>
+                </button>`;
+            }
+        }
+        return `
+        <div class="hdr">
+            <button class="btn-voltar" data-nav="home">VOLTAR</button>
+            <h1>CAIXA CONGREGACAO</h1>
+        </div>
+        <div class="scroll">
+            <div class="small-note" style="margin-bottom:10px">Somente informativo — sem geracao de PDF. Os meses listados sao gerados automaticamente a partir dos lancamentos.</div>
+            ${listaHtml}
+        </div>`;
+    },
+
+    congMesDetalhe(chave) {
+        const { ent, sai, saldo } = CongService.totaisDoMes(chave);
+        const entries = CongService.entriesDoMes(chave).sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+        const corSal = saldo >= 0 ? "var(--green)" : "var(--red)";
+        let rowsHtml = "";
+        if (!entries.length) {
+            rowsHtml = `<div class="muted-msg">Nenhum lancamento neste mes.</div>`;
+        } else {
+            for (const e of entries) {
+                const isEnt = e.type === "entrada";
+                const sinal = isEnt ? "+" : "-";
+                const valClass = isEnt ? "ent" : "sai";
+                rowsHtml += `
+                <div class="entry-row bg-card">
+                    <div class="entry-info">
+                        <div class="entry-desc">${escapeHtml(e.desc)}</div>
+                        <div class="entry-sub">${escapeHtml(e.date)}${isEnt ? "  ENTRADA" : "  SAIDA"}</div>
+                    </div>
+                    <div class="entry-value ${valClass}">${sinal}${formatarMoeda(e.value)}</div>
+                    <button class="btn-edit" data-action="congEditar" data-id="${e.id}">Ed</button>
+                </div>`;
+            }
+        }
+        return `
+        <div class="hdr">
+            <button class="btn-voltar" data-nav="cong_mes_list">VOLTAR</button>
+            <h1>${escapeHtml(formatarChave(chave))}</h1>
+        </div>
+        <div class="scroll">
+            <div class="card" style="margin-bottom:14px">
+                <div class="linha-painel bold">
+                    <span>Saldo do mes</span>
+                    <span style="color:${corSal}">${formatarMoeda(saldo)}</span>
+                </div>
+                <div class="separador" style="margin:4px 0"></div>
+                <div class="linha-painel"><span>Entradas</span><span style="color:var(--green)">${formatarMoeda(ent)}</span></div>
+                <div class="linha-painel"><span>Saidas</span><span style="color:var(--red)">${formatarMoeda(sai)}</span></div>
+            </div>
+            ${renderSectionHeader("LANCAMENTOS DO MES", "rgb(59,130,245)")}
+            ${rowsHtml}
+        </div>`;
     },
 
     _painelBackup() {
@@ -3322,7 +3623,7 @@ Object.assign(Screens, {
                     <div class="desc">${escapeHtml(entry.desc)}</div>
                     <div class="val">${formatarMoeda(entry.value)}</div>
                 </div>
-                <button class="btn btn-small" style="width:auto;background:rgb(36,51,92)" data-action="editar-entry" data-id="${entry.id}">Editar</button>
+                <button class="btn btn-small" style="width:auto;background:var(--accent2)" data-action="editar-entry" data-id="${entry.id}">Editar</button>
             </div>`;
 
         let entradasHtml = "";
@@ -3465,7 +3766,7 @@ const Modals = {
 
     selecaoEntrada() {
         openModal(`
-        <div class="modal-hdr" style="color:rgb(33,196,94)">+ Nova Entrada</div>
+        <div class="modal-hdr" style="color:var(--green)">+ Nova Entrada</div>
         <div class="modal-scroll">
             <button class="btn btn-accent2" id="btn-dep">Caixa Departamento</button>
             <div style="height:8px"></div>
@@ -3536,7 +3837,7 @@ const Modals = {
         openModal(`
         <div class="modal-hdr" style="color:var(--accent)">Caixa Geral — Pagamento</div>
         <div class="modal-scroll">
-            <button class="btn" style="background:rgb(20,107,184)" id="btn-pix">Pix</button>
+            <button class="btn" style="background:var(--accent)" id="btn-pix">Pix</button>
             <div style="height:8px"></div>
             <button class="btn btn-green" id="btn-din">Dinheiro</button>
             <div style="height:12px"></div>
@@ -3626,6 +3927,137 @@ const Modals = {
                     if (!v.ok) { Toast.erro(v.msg); return; }
                     const entry = await App.svc.addSaida(desc, val, dataStr);
                     if (entry) { closeModal(); Toast.ok("Despesa registrada."); App.refreshCurrent(); }
+                };
+            }
+        });
+    },
+
+    // ── Caixa Congregacao (caixa independente) ──────────────────────────
+    congEntrada() {
+        openModal(`
+        <div class="modal-hdr" style="color:var(--green)">+ Entrada — Congregacao</div>
+        <div class="modal-scroll">
+            <div class="field-label">Descricao</div>
+            <input type="text" class="field" id="cg-desc" placeholder="Nome ou descricao">
+            <div class="field-row">
+                <div>
+                    <div class="field-label">Valor (R$)</div>
+                    <input type="text" inputmode="decimal" class="field valor-input" id="cg-valor" placeholder="0,00">
+                </div>
+                <div>
+                    <div class="field-label">Data</div>
+                    <input type="text" inputmode="numeric" class="field data-input" id="cg-data" placeholder="AAAA-MM-DD">
+                </div>
+            </div>
+            <div class="btn-row" style="margin-top:8px">
+                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
+                <button class="btn btn-green" id="btn-confirmar">Confirmar</button>
+            </div>
+        </div>`, {
+            onOpen: () => {
+                setDataInput(document.getElementById("cg-data"), hojeStr());
+                document.getElementById("btn-cancelar").onclick = closeModal;
+                document.getElementById("btn-confirmar").onclick = () => {
+                    const desc = document.getElementById("cg-desc").value.trim();
+                    const val = getValorFromInput(document.getElementById("cg-valor"));
+                    const dataStr = document.getElementById("cg-data").value;
+                    const v = validarLancamento(desc, val, dataStr);
+                    if (!v.ok) { Toast.erro(v.msg); return; }
+                    CongService.addEntry("entrada", desc, val, dataStr);
+                    closeModal();
+                    Toast.ok("Entrada da Congregacao registrada.");
+                    App.refreshCurrent();
+                };
+            }
+        });
+    },
+
+    congSaida() {
+        openModal(`
+        <div class="modal-hdr" style="color:var(--red)">- Saida — Congregacao</div>
+        <div class="modal-scroll">
+            <div class="field-label">Descricao</div>
+            <input type="text" class="field" id="cs-desc" placeholder="Ex: Manutencao">
+            <div class="field-row">
+                <div>
+                    <div class="field-label">Valor (R$)</div>
+                    <input type="text" inputmode="decimal" class="field valor-input" id="cs-valor" placeholder="0,00">
+                </div>
+                <div>
+                    <div class="field-label">Data</div>
+                    <input type="text" inputmode="numeric" class="field data-input" id="cs-data" placeholder="AAAA-MM-DD">
+                </div>
+            </div>
+            <div class="btn-row" style="margin-top:8px">
+                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
+                <button class="btn btn-red" id="btn-confirmar">Confirmar</button>
+            </div>
+        </div>`, {
+            onOpen: () => {
+                setDataInput(document.getElementById("cs-data"), hojeStr());
+                document.getElementById("btn-cancelar").onclick = closeModal;
+                document.getElementById("btn-confirmar").onclick = () => {
+                    const desc = document.getElementById("cs-desc").value.trim();
+                    const val = getValorFromInput(document.getElementById("cs-valor"));
+                    const dataStr = document.getElementById("cs-data").value;
+                    const v = validarLancamento(desc, val, dataStr);
+                    if (!v.ok) { Toast.erro(v.msg); return; }
+                    CongService.addEntry("saida", desc, val, dataStr);
+                    closeModal();
+                    Toast.ok("Saida da Congregacao registrada.");
+                    App.refreshCurrent();
+                };
+            }
+        });
+    },
+
+    congEditar(dataset) {
+        const entry = CongService.getEntry(dataset.id);
+        if (!entry) return;
+        const isEnt = entry.type === "entrada";
+        const cor = isEnt ? "var(--green)" : "var(--red)";
+        openModal(`
+        <div class="modal-hdr" style="color:${cor}">Editar ${isEnt ? "Entrada" : "Saida"} — Congregacao</div>
+        <div class="modal-scroll">
+            <div class="field-label">Descricao</div>
+            <input type="text" class="field" id="ceg-desc" value="${escapeHtml(entry.desc)}">
+            <div class="field-row">
+                <div>
+                    <div class="field-label">Valor (R$)</div>
+                    <input type="text" inputmode="decimal" class="field valor-input" id="ceg-valor">
+                </div>
+                <div>
+                    <div class="field-label">Data</div>
+                    <input type="text" inputmode="numeric" class="field data-input" id="ceg-data">
+                </div>
+            </div>
+            <div class="btn-row" style="margin-top:8px">
+                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
+                <button class="btn" style="background:${cor}" id="btn-salvar">Salvar</button>
+            </div>
+            <div class="separador red2" style="margin:10px 0"></div>
+            <button class="btn" style="background:var(--red2)" id="btn-excluir">Excluir este registro</button>
+        </div>`, {
+            onOpen: () => {
+                setValorInput(document.getElementById("ceg-valor"), entry.value);
+                setDataInput(document.getElementById("ceg-data"), entry.date);
+                document.getElementById("btn-cancelar").onclick = closeModal;
+                document.getElementById("btn-salvar").onclick = () => {
+                    const desc = document.getElementById("ceg-desc").value.trim();
+                    const val = getValorFromInput(document.getElementById("ceg-valor"));
+                    const dataStr = document.getElementById("ceg-data").value;
+                    const v = validarLancamento(desc, val, dataStr);
+                    if (!v.ok) { Toast.erro(v.msg); return; }
+                    CongService.editEntry(entry.id, { desc, value: val, dataStr });
+                    closeModal();
+                    Toast.ok("Registro atualizado.");
+                    App.refreshCurrent();
+                };
+                document.getElementById("btn-excluir").onclick = () => {
+                    CongService.deleteEntry(entry.id);
+                    closeModal();
+                    Toast.ok("Registro excluido.");
+                    App.refreshCurrent();
                 };
             }
         });
@@ -3733,6 +4165,56 @@ const Modals = {
         });
     },
 
+    menuConfig() {
+        openModal(`
+        <div class="modal-hdr" style="color:var(--accent)">Menu</div>
+        <div class="modal-scroll">
+            <div class="settings-list">
+                <button class="settings-item" id="cfg-config">
+                    <div class="ico">⚙</div>
+                    <div class="txt">
+                        <div class="t1">Configuracoes</div>
+                        <div class="t2">Entradas e despesas fixas do mes</div>
+                    </div>
+                    <div class="chev">›</div>
+                </button>
+                <button class="settings-item" id="cfg-relatorio">
+                    <div class="ico">📊</div>
+                    <div class="txt">
+                        <div class="t1">Relatorio</div>
+                        <div class="t2">Resumo de fechamento do mes atual</div>
+                    </div>
+                    <div class="chev">›</div>
+                </button>
+                <button class="settings-item" id="cfg-backup">
+                    <div class="ico">💾</div>
+                    <div class="txt">
+                        <div class="t1">Backup e Restauracao</div>
+                        <div class="t2">Nuvem, arquivo local e restaurar</div>
+                    </div>
+                    <div class="chev">›</div>
+                </button>
+            </div>
+            <button class="btn btn-border" id="btn-fechar-menu" style="margin-top:8px">Fechar</button>
+        </div>`, {
+            onOpen: () => {
+                document.getElementById("btn-fechar-menu").onclick = closeModal;
+                document.getElementById("cfg-config").onclick = () => {
+                    closeModal();
+                    App.navigateTo("config");
+                };
+                document.getElementById("cfg-relatorio").onclick = () => {
+                    closeModal();
+                    App.abrirRelatorio(chaveAtual(), "home");
+                };
+                document.getElementById("cfg-backup").onclick = () => {
+                    closeModal();
+                    Modals.abrirBackup();
+                };
+            }
+        });
+    },
+
     async abrirBackup() {
         const backups = await BackupService.listarBackups();
         const listaHtml = backups.length
@@ -3758,7 +4240,7 @@ const Modals = {
             </div>
             <div class="btn-row">
                 <button class="btn btn-small btn-accent" id="btn-cloud-sync">Enviar agora</button>
-                <button class="btn btn-small" style="background:rgb(140,71,10)" id="btn-cloud-restaurar">Restaurar da nuvem</button>
+                <button class="btn btn-small" style="background:#C2410C" id="btn-cloud-restaurar">Restaurar da nuvem</button>
             </div>
             ${CloudService.isUnlocked()
                 ? `<button class="btn btn-small btn-border" id="btn-cloud-desligar" style="margin-bottom:6px">Desligar nuvem neste aparelho</button>`
@@ -3917,7 +4399,7 @@ const Modals = {
             <div class="small-note" style="margin-bottom:10px">Os dados atuais serao SUBSTITUIDOS pelo backup da nuvem.</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn" style="background:rgb(140,71,10)" id="btn-restaurar">Restaurar</button>
+                <button class="btn" style="background:#C2410C" id="btn-restaurar">Restaurar</button>
             </div>
         </div>`, {
             onOpen: () => {
@@ -3945,7 +4427,7 @@ const Modals = {
             <div class="small-note" style="margin-bottom:10px">Backup: ${escapeHtml(BackupService.nomeCurto(filename))}<br>Dados atuais serao SUBSTITUIDOS.</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn" style="background:rgb(140,71,10)" id="btn-restaurar">Restaurar</button>
+                <button class="btn" style="background:#C2410C" id="btn-restaurar">Restaurar</button>
             </div>
         </div>`, {
             onOpen: () => {
@@ -3972,7 +4454,7 @@ const Modals = {
             <div class="small-note" style="margin-bottom:10px">Arquivo: ${escapeHtml(file.name)}<br>Dados atuais serao SUBSTITUIDOS (apenas se o arquivo for valido).</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn" style="background:rgb(140,71,10)" id="btn-restaurar">Restaurar</button>
+                <button class="btn" style="background:#C2410C" id="btn-restaurar">Restaurar</button>
             </div>
         </div>`, {
             onOpen: () => {
