@@ -1517,6 +1517,9 @@ const DataStore = (function () {
             try {
                 if (typeof CloudService !== "undefined") CloudService.scheduleSync();
             } catch (e) { /* cloud opcional */ }
+            try {
+                if (typeof GitHubSync !== "undefined") GitHubSync.scheduleSync();
+            } catch (e) { /* github opcional */ }
             return true;
         } catch (e) {
             console.error("Erro ao salvar:", e);
@@ -2357,6 +2360,223 @@ const CloudService = (function () {
     };
 })();
 
+// ========== github-sync.js ==========
+// GITHUB SYNC — grava/carrega estado em arquivo JSON no repositório GitHub.
+// Token fica só no localStorage deste aparelho (não no HTML público).
+const GitHubSync = (function () {
+    const LS_OWNER = "caixa_moriah_gh_owner";
+    const LS_REPO = "caixa_moriah_gh_repo";
+    const LS_PATH = "caixa_moriah_gh_path";
+    const LS_BRANCH = "caixa_moriah_gh_branch";
+    const LS_TOKEN = "caixa_moriah_gh_token";
+    const LS_ENABLED = "caixa_moriah_gh_enabled";
+    const DEBOUNCE_MS = 2500;
+
+    let _timer = null;
+    let _syncing = false;
+    let _lastSha = null;
+    let _lastStatus = "";
+
+    function getConfig() {
+        return {
+            owner: (localStorage.getItem(LS_OWNER) || "").trim(),
+            repo: (localStorage.getItem(LS_REPO) || "").trim(),
+            path: (localStorage.getItem(LS_PATH) || "data/caixa-moriah.json").trim() || "data/caixa-moriah.json",
+            branch: (localStorage.getItem(LS_BRANCH) || "main").trim() || "main",
+            token: (localStorage.getItem(LS_TOKEN) || "").trim(),
+            enabled: localStorage.getItem(LS_ENABLED) === "1",
+        };
+    }
+
+    function setConfig({ owner, repo, path, branch, token, enabled }) {
+        if (owner != null) localStorage.setItem(LS_OWNER, String(owner).trim());
+        if (repo != null) localStorage.setItem(LS_REPO, String(repo).trim());
+        if (path != null) localStorage.setItem(LS_PATH, String(path).trim() || "data/caixa-moriah.json");
+        if (branch != null) localStorage.setItem(LS_BRANCH, String(branch).trim() || "main");
+        if (token != null) localStorage.setItem(LS_TOKEN, String(token).trim());
+        if (enabled != null) localStorage.setItem(LS_ENABLED, enabled ? "1" : "0");
+    }
+
+    function isConfigured() {
+        const c = getConfig();
+        return !!(c.owner && c.repo && c.path);
+    }
+    function canWrite() {
+        const c = getConfig();
+        return isConfigured() && !!c.token && c.enabled;
+    }
+    function canRead() {
+        return isConfigured() && getConfig().enabled;
+    }
+
+    function _toBase64(str) {
+        try { return btoa(unescape(encodeURIComponent(str))); }
+        catch (e) {
+            const bytes = new TextEncoder().encode(str);
+            let bin = "";
+            bytes.forEach((b) => { bin += String.fromCharCode(b); });
+            return btoa(bin);
+        }
+    }
+    function _fromBase64(b64) {
+        try { return decodeURIComponent(escape(atob(b64))); }
+        catch (e) {
+            const bin = atob(b64);
+            const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+            return new TextDecoder().decode(bytes);
+        }
+    }
+    function _apiHeaders(token, extra) {
+        const h = Object.assign({
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }, extra || {});
+        if (token) h["Authorization"] = "Bearer " + token;
+        return h;
+    }
+    function _pathEnc(p) {
+        return p.split("/").map(encodeURIComponent).join("/");
+    }
+    function _contentsUrl(c) {
+        return `https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${_pathEnc(c.path)}?ref=${encodeURIComponent(c.branch)}`;
+    }
+    function _rawUrl(c) {
+        return `https://raw.githubusercontent.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/${encodeURIComponent(c.branch)}/${_pathEnc(c.path)}?t=${Date.now()}`;
+    }
+
+    async function fetchRemote() {
+        if (!canRead()) return { ok: false, error: "GitHub nao configurado/ativado." };
+        const c = getConfig();
+        try {
+            const res = await fetch(_contentsUrl(c), {
+                headers: _apiHeaders(c.token || undefined),
+                cache: "no-store",
+            });
+            if (res.status === 404) return { ok: true, missing: true, content: null, sha: null };
+            if (!res.ok) {
+                const txt = await res.text().catch(() => "");
+                if (!c.token) throw new Error("API " + res.status);
+                return { ok: false, error: `GitHub API (${res.status}): ${txt.slice(0, 140)}` };
+            }
+            const json = await res.json();
+            _lastSha = json.sha || null;
+            const content = json.content ? _fromBase64(String(json.content).replace(/\n/g, "")) : null;
+            return { ok: true, missing: false, content, sha: json.sha };
+        } catch (e) {
+            try {
+                const res2 = await fetch(_rawUrl(c), { cache: "no-store" });
+                if (res2.status === 404) return { ok: true, missing: true, content: null, sha: null };
+                if (!res2.ok) return { ok: false, error: "Raw GitHub (" + res2.status + ")" };
+                return { ok: true, missing: false, content: await res2.text(), sha: null };
+            } catch (e2) {
+                return { ok: false, error: e.message || e2.message || "Falha de rede GitHub." };
+            }
+        }
+    }
+
+    async function pushNow() {
+        if (!canWrite()) return { ok: false, error: "GitHub sem token ou desativado." };
+        if (_syncing) return { ok: false, error: "Sync em andamento." };
+        _syncing = true;
+        _lastStatus = "enviando...";
+        const c = getConfig();
+        try {
+            if (!_lastSha) {
+                const remote = await fetchRemote();
+                if (!remote.ok) { _syncing = false; return remote; }
+                if (remote.sha) _lastSha = remote.sha;
+            }
+            const body = {
+                message: "Caixa Moriah auto-save " + new Date().toISOString(),
+                content: _toBase64(DataStore.exportJSON()),
+                branch: c.branch,
+            };
+            if (_lastSha) body.sha = _lastSha;
+            const putUrl = `https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${_pathEnc(c.path)}`;
+            const res = await fetch(putUrl, {
+                method: "PUT",
+                headers: _apiHeaders(c.token, { "Content-Type": "application/json" }),
+                body: JSON.stringify(body),
+            });
+            const txt = await res.text();
+            let json = null;
+            try { json = JSON.parse(txt); } catch (_) {}
+            if (!res.ok) {
+                if (res.status === 409 || (json && /sha/i.test(json.message || ""))) {
+                    _lastSha = null;
+                    _syncing = false;
+                    return pushNow();
+                }
+                _lastStatus = "erro";
+                _syncing = false;
+                return { ok: false, error: `GitHub (${res.status}): ${(json && json.message) || txt.slice(0, 160)}` };
+            }
+            if (json && json.content && json.content.sha) _lastSha = json.content.sha;
+            _lastStatus = "ok";
+            _syncing = false;
+            return { ok: true };
+        } catch (e) {
+            _lastStatus = "erro";
+            _syncing = false;
+            return { ok: false, error: e.message || "Erro de rede GitHub." };
+        }
+    }
+
+    function scheduleSync() {
+        if (!canWrite()) return;
+        clearTimeout(_timer);
+        _timer = setTimeout(() => {
+            pushNow().then((r) => {
+                if (!r.ok) console.warn("GitHub sync:", r.error);
+                else console.log("GitHub sync OK");
+            });
+        }, DEBOUNCE_MS);
+    }
+
+    async function pullOnBoot() {
+        if (!canRead()) return { ok: false, skipped: true };
+        try {
+            const remote = await fetchRemote();
+            if (!remote.ok) return remote;
+            if (remote.missing || !remote.content) return { ok: true, applied: false, reason: "arquivo ainda nao existe" };
+            const validation = DataStore.validateBackup(remote.content);
+            if (!validation.ok) return { ok: false, error: "JSON remoto invalido: " + validation.error };
+            const local = DataStore.load();
+            const localEmpty = !local.entries || local.entries.length === 0;
+            if (!localEmpty) return { ok: true, applied: false, reason: "local com dados" };
+            const parsed = typeof remote.content === "string" ? JSON.parse(remote.content) : remote.content;
+            const r = await DataStore.replaceData(parsed);
+            if (r && r.ok === false) return r;
+            return { ok: true, applied: true };
+        } catch (e) {
+            return { ok: false, error: e.message || "Falha ao puxar GitHub." };
+        }
+    }
+
+    async function restoreFromGitHub() {
+        const remote = await fetchRemote();
+        if (!remote.ok) return remote;
+        if (remote.missing || !remote.content) return { ok: false, error: "Arquivo ainda nao existe no GitHub." };
+        const validation = DataStore.validateBackup(remote.content);
+        if (!validation.ok) return { ok: false, error: validation.error };
+        const parsed = typeof remote.content === "string" ? JSON.parse(remote.content) : remote.content;
+        const r = await DataStore.replaceData(parsed);
+        return r && r.ok === false ? r : { ok: true };
+    }
+
+    function statusText() {
+        if (!isConfigured()) return "GitHub nao configurado";
+        if (!getConfig().enabled) return "GitHub configurado — desativado";
+        if (!getConfig().token) return "GitHub leitura OK (sem token = so baixa)";
+        return _syncing ? "GitHub sincronizando..." : (_lastStatus === "ok" ? "GitHub ativo (auto-save)" : (_lastStatus === "erro" ? "GitHub com erro no ultimo envio" : "GitHub ativo"));
+    }
+
+    return {
+        getConfig, setConfig, isConfigured, canWrite, canRead,
+        fetchRemote, pushNow, scheduleSync, pullOnBoot, restoreFromGitHub, statusText,
+    };
+})();
+
 // ========== pdf.js ==========
 // ══════════════════════════════════════════════════════════════════════════
 // PDF.JS — equivalente a PDFService do Python (livro-caixa modelo CaixaMoriah)
@@ -3085,6 +3305,13 @@ const App = {
 
     async init() {
         await DataStore.init();
+        try {
+            if (typeof GitHubSync !== "undefined" && GitHubSync.canRead()) {
+                const pull = await GitHubSync.pullOnBoot();
+                if (pull && pull.applied) console.log("Dados restaurados do GitHub na abertura.");
+                else if (pull && !pull.ok) console.warn("GitHub pull:", pull.error);
+            }
+        } catch (e) { console.warn("GitHub pullOnBoot:", e); }
         this.svc = new FinanceService(DataStore.load());
         await migrarDadosLegados(this.svc);
         await this.svc.ensureFixedEntries(chaveAtual());
@@ -4242,6 +4469,17 @@ const Modals = {
         <div class="modal-hdr" style="color:var(--accent)">Backup e Restauracao</div>
         <div class="modal-scroll">
 
+            <div class="field-label" style="font-weight:700;color:var(--accent);font-size:13px">GitHub (auto-save no repositorio)</div>
+            <div class="small-note" id="github-status-note" style="margin-bottom:6px">${escapeHtml(typeof GitHubSync !== "undefined" ? GitHubSync.statusText() : "—")}</div>
+            <div class="btn-row">
+                <button class="btn btn-small btn-accent2" id="btn-github-config">Configurar GitHub</button>
+                <button class="btn btn-small btn-green" id="btn-github-push">Enviar agora</button>
+            </div>
+            <div class="btn-row" style="margin-top:6px">
+                <button class="btn btn-small" style="background:#C2410C" id="btn-github-pull">Restaurar do GitHub</button>
+            </div>
+            <div class="small-note" style="margin:8px 0 12px">Ao lancar (dizimo, oferta…), o app grava neste aparelho e envia o JSON ao GitHub. Ao abrir o link noutro celular, puxa os dados se estiver vazio.</div>
+
             <div class="field-label" style="font-weight:700;color:var(--accent);font-size:13px">Nuvem (Supabase)</div>
             <div class="small-note" id="cloud-status-note" style="margin-bottom:6px">${escapeHtml(cloudStatus)}</div>
             <div class="btn-row">
@@ -4294,6 +4532,34 @@ const Modals = {
                     if (file) Modals.confirmaRestoreArquivo(file);
                 };
 
+                const btnGhCfg = document.getElementById("btn-github-config");
+                if (btnGhCfg) btnGhCfg.onclick = () => Modals.githubConfig();
+                const btnGhPush = document.getElementById("btn-github-push");
+                if (btnGhPush) btnGhPush.onclick = async () => {
+                    if (!GitHubSync.canWrite()) {
+                        Toast.erro("Configure owner/repo/token e ative o GitHub.");
+                        return;
+                    }
+                    Toast.ok("Enviando para o GitHub...");
+                    const r = await GitHubSync.pushNow();
+                    if (r.ok) Toast.ok("Dados salvos no GitHub.");
+                    else Toast.erro(r.error || "Falha ao enviar.");
+                    Modals.abrirBackup();
+                };
+                const btnGhPull = document.getElementById("btn-github-pull");
+                if (btnGhPull) btnGhPull.onclick = async () => {
+                    if (!confirm("Substituir os dados deste aparelho pelos do GitHub?")) return;
+                    Toast.ok("Baixando do GitHub...");
+                    const r = await GitHubSync.restoreFromGitHub();
+                    if (r.ok) {
+                        App.svc = new FinanceService(DataStore.load());
+                        Toast.ok("Dados restaurados do GitHub.");
+                        App.refreshCurrent();
+                    } else {
+                        Toast.erro(r.error || "Falha ao restaurar.");
+                    }
+                    Modals.abrirBackup();
+                };
                 document.getElementById("btn-cloud-config").onclick = () => Modals.cloudConfig();
                 document.getElementById("btn-cloud-ligar").onclick = async () => {
                     const r = await CloudService.ensureUnlocked("Ligar nuvem");
@@ -4323,6 +4589,57 @@ const Modals = {
                     CloudService.lock();
                     Toast.ok("Nuvem desligada neste aparelho.");
                     Modals.abrirBackup();
+                };
+            }
+        });
+    },
+
+    githubConfig() {
+        const cfg = (typeof GitHubSync !== "undefined") ? GitHubSync.getConfig() : { owner:"", repo:"", path:"data/caixa-moriah.json", branch:"main", token:"", enabled:false };
+        openModal(`
+        <div class="modal-hdr" style="color:var(--accent)">Configurar GitHub</div>
+        <div class="modal-scroll">
+            <div class="small-note" style="margin-bottom:8px">
+                Crie um repositorio no GitHub e um <b>Personal Access Token</b> (classic)
+                com permissao <b>repo</b> (ou Contents: Read and write).
+                O token fica so neste aparelho (localStorage), nao no codigo HTML.
+            </div>
+            <div class="field-label">Dono (usuario ou org)</div>
+            <input type="text" id="gh-owner" class="field" placeholder="seu-usuario" value="${escapeHtml(cfg.owner)}">
+            <div class="field-label" style="margin-top:8px">Repositorio</div>
+            <input type="text" id="gh-repo" class="field" placeholder="caixa-moriah-dados" value="${escapeHtml(cfg.repo)}">
+            <div class="field-label" style="margin-top:8px">Caminho do arquivo JSON</div>
+            <input type="text" id="gh-path" class="field" placeholder="data/caixa-moriah.json" value="${escapeHtml(cfg.path)}">
+            <div class="field-label" style="margin-top:8px">Branch</div>
+            <input type="text" id="gh-branch" class="field" placeholder="main" value="${escapeHtml(cfg.branch)}">
+            <div class="field-label" style="margin-top:8px">Token (PAT)</div>
+            <input type="password" id="gh-token" class="field" placeholder="ghp_..." value="${escapeHtml(cfg.token)}">
+            <label style="display:flex;align-items:center;gap:8px;margin:12px 0;font-size:13px">
+                <input type="checkbox" id="gh-enabled" ${cfg.enabled ? "checked" : ""}>
+                Ativar auto-save no GitHub
+            </label>
+            <div class="btn-row" style="margin-top:12px">
+                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
+                <button class="btn btn-green" id="btn-salvar-gh">Salvar</button>
+            </div>
+        </div>`, {
+            onOpen: () => {
+                document.getElementById("btn-cancelar").onclick = () => Modals.abrirBackup();
+                document.getElementById("btn-salvar-gh").onclick = () => {
+                    GitHubSync.setConfig({
+                        owner: document.getElementById("gh-owner").value,
+                        repo: document.getElementById("gh-repo").value,
+                        path: document.getElementById("gh-path").value,
+                        branch: document.getElementById("gh-branch").value,
+                        token: document.getElementById("gh-token").value,
+                        enabled: document.getElementById("gh-enabled").checked,
+                    });
+                    if (GitHubSync.isConfigured()) {
+                        Toast.ok(GitHubSync.canWrite() ? "GitHub ativo — lancamentos serao enviados." : "GitHub salvo (sem token = so leitura).");
+                        Modals.abrirBackup();
+                    } else {
+                        Toast.erro("Preencha pelo menos dono e repositorio.");
+                    }
                 };
             }
         });
