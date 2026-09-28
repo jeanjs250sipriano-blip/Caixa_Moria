@@ -1,7 +1,7 @@
 {
   "backup_version": 1,
   "app": "Caixa Moriah",
-  "created_at": "2026-09-28T09:51:15.299Z",
+  "created_at": "2026-09-28T09:56:17.803Z",
   "data": {
     "entries": [
       {
@@ -1373,16 +1373,6 @@
         "auto_dep": true,
         "grupo_vinculado": "d20cc8a8-d778-45c5-80f1-631d81df63f4",
         "linked_entry": "0833fb0a-7118-4051-b1a3-fce882bc2527"
-      },
-      {
-        "id": "db985ab0-1471-4290-bdd8-c366bf26ae75",
-        "desc": "Test",
-        "value": 10000,
-        "date": "2026-09-28",
-        "type": "entrada",
-        "payment_type": "dinheiro",
-        "dep": false,
-        "fixed_id": null
       }
     ],
     "cultos_edicoes": {
