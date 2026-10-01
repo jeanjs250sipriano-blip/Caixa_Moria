@@ -2336,54 +2336,83 @@ const FirebaseSync = (function () {
         try {
             const remote = await fetchRemote();
             if (!remote.ok) return remote;
+            const local = DataStore.load();
+            let congLen = 0;
+            try { congLen = (typeof CongService !== "undefined" && CongService._load) ? CongService._load().length : 0; } catch (_) {}
+            const localEmpty = !(local.entries && local.entries.length) && !congLen;
 
             if (remote.missing || !remote.data) {
-                // Nuvem vazia: sobe o que tiver no aparelho
-                const local = DataStore.load();
-                let hasCong = false;
-                try { hasCong = !!(typeof CongService !== "undefined" && CongService._load && CongService._load().length); } catch (_) {}
-                if ((local.entries && local.entries.length) || hasCong) {
+                if (!localEmpty) {
                     const up = await pushNow();
                     return { ok: up.ok, applied: false, uploaded: !!up.ok, error: up.error };
                 }
                 return { ok: true, applied: false, reason: "nuvem vazia" };
             }
 
-            // Aplica o backup COMPLETO da nuvem no aparelho (inclui exclusões já gravadas).
-            // replaceData substitui entries/cultos; cong_entries tratado em seguida.
-            const envelope = {
-                backup_version: 1,
-                app: "Caixa Moriah",
-                created_at: remote.data.updatedAt || new Date().toISOString(),
-                data: {
-                    entries: remote.data.entries || [],
-                    cultos_edicoes: remote.data.cultos_edicoes || {},
-                    cong_entries: remote.data.cong_entries || []
-                }
-            };
-            const r = await DataStore.replaceData(envelope);
-            if (r && r.ok === false) return r;
+            // Aparelho vazio: restaura backup completo da nuvem
+            if (localEmpty) {
+                const r = await applyRemote(remote.data, "replace");
+                return r;
+            }
 
-            // Caixa local (congregacao): espelha o que está na nuvem
-            try {
-                if (typeof CongService !== "undefined" && CongService._save) {
-                    CongService._save(Array.isArray(remote.data.cong_entries) ? remote.data.cong_entries : []);
-                }
-            } catch (err) { console.warn("cong restore:", err); }
-
-            try { localStorage.setItem("caixa_moriah_fb_last_push", remote.data.updatedAt || ""); } catch (_) {}
-
+            // Aparelho com dados: nao sobrescreve automaticamente.
+            // Usuario usa "Mesclar" ou "Substituir" no painel de backup.
             _lastStatus = "ok";
             _lastAt = Date.now();
-            return { ok: true, applied: true };
+            return { ok: true, applied: false, reason: "local com dados — use Mesclar ou Substituir" };
         } catch (e) {
             _lastError = e.message || String(e);
             return { ok: false, error: _lastError };
         }
     }
 
+    /** mode: "merge" | "replace" */
+    async function applyRemote(data, mode) {
+        if (!data) return { ok: false, error: "Sem dados remotos." };
+        const envelope = {
+            backup_version: 1,
+            app: "Caixa Moriah",
+            created_at: data.updatedAt || new Date().toISOString(),
+            data: {
+                entries: data.entries || [],
+                cultos_edicoes: data.cultos_edicoes || {},
+                cong_entries: data.cong_entries || []
+            }
+        };
+        let r;
+        if (mode === "replace") {
+            r = await DataStore.replaceData(envelope);
+            try {
+                if (typeof CongService !== "undefined" && CongService._save) {
+                    CongService._save(Array.isArray(data.cong_entries) ? data.cong_entries : []);
+                }
+            } catch (err) { console.warn("cong replace:", err); }
+        } else {
+            r = await DataStore.mergeData(envelope);
+        }
+        if (r && r.ok === false) return r;
+        _lastStatus = "ok";
+        _lastAt = Date.now();
+        return { ok: true, applied: true, mode };
+    }
+
+    async function mesclarDaNuvem() {
+        const remote = await fetchRemote();
+        if (!remote.ok) return remote;
+        if (remote.missing || !remote.data) return { ok: false, error: "Nenhum backup na nuvem ainda." };
+        return applyRemote(remote.data, "merge");
+    }
+
+    async function substituirPelaNuvem() {
+        const remote = await fetchRemote();
+        if (!remote.ok) return remote;
+        if (remote.missing || !remote.data) return { ok: false, error: "Nenhum backup na nuvem ainda." };
+        return applyRemote(remote.data, "replace");
+    }
+
     return {
         statusText, pushNow, scheduleSync, pullOnBoot, fetchRemote,
+        mesclarDaNuvem, substituirPelaNuvem, applyRemote,
         get lastError() { return _lastError; },
         get lastStatus() { return _lastStatus; },
     };
@@ -3232,16 +3261,73 @@ const CongService = {
         try { localStorage.setItem(CONG_STORAGE_KEY, JSON.stringify(list)); } catch (e) { /* ignore */ }
     },
     chaveDeData(dataStr) {
+        // Calendario civil (YYYY-MM) — NAO segue o periodo da Santa Ceia do Caixa Moriah
         return String(dataStr || "").slice(0, 7);
     },
     chaveAtual() {
         return this.chaveDeData(hojeStr());
     },
-    addEntry(type, desc, value, dataStr) {
+    /** Mes anterior no calendario: "2026-10" → "2026-09" */
+    chaveAnterior(chave) {
+        try {
+            const [y, m] = String(chave).split("-").map(Number);
+            let mes = m - 1, ano = y;
+            if (mes < 1) { mes = 12; ano -= 1; }
+            return `${ano}-${String(mes).padStart(2, "0")}`;
+        } catch (e) {
+            return null;
+        }
+    },
+    /**
+     * Ao abrir um mes, se ainda nao houver lancamento de saldo anterior,
+     * traz o saldo do mes calendario anterior:
+     *  - positivo → entrada "Saldo mes anterior"
+     *  - negativo → saida "Saldo mes anterior"
+     *  - zero → nao cria nada
+     */
+    ensureSaldoAnterior(chave) {
+        if (!chave || !/^\d{4}-\d{2}$/.test(chave)) return false;
         const list = this._load();
-        const entry = { id: gerarId(), type, desc, value, date: dataStr, chave: this.chaveDeData(dataStr) };
+        const jaTem = list.some(e => e.chave === chave && e.saldo_anterior);
+        if (jaTem) return false;
+
+        const ant = this.chaveAnterior(chave);
+        if (!ant) return false;
+        const { saldo } = this.totaisDoMes(ant);
+        if (!saldo || Math.abs(saldo) < 0.005) return false;
+
+        const tipo = saldo > 0 ? "entrada" : "saida";
+        const valor = Math.abs(Number(saldo));
+        const entry = {
+            id: gerarId(),
+            type: tipo,
+            desc: "Saldo mes anterior",
+            value: valor,
+            date: `${chave}-01`,
+            chave,
+            saldo_anterior: true,
+            updatedAt: new Date().toISOString()
+        };
         list.push(entry);
         this._save(list);
+        try { if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync(); } catch (_) {}
+        return true;
+    },
+    addEntry(type, desc, value, dataStr) {
+        const list = this._load();
+        const chave = this.chaveDeData(dataStr);
+        // Garante saldo anterior no mes do lancamento
+        this.ensureSaldoAnterior(chave);
+        const entry = {
+            id: gerarId(), type, desc, value, date: dataStr,
+            chave,
+            updatedAt: new Date().toISOString()
+        };
+        // reload apos ensure
+        const list2 = this._load();
+        list2.push(entry);
+        this._save(list2);
+        try { if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync(); } catch (_) {}
         return entry;
     },
     getEntry(id) {
@@ -3251,7 +3337,17 @@ const CongService = {
         const list = this._load();
         const idx = list.findIndex(e => e.id === id);
         if (idx === -1) return false;
-        list[idx] = { ...list[idx], desc, value, date: dataStr, chave: this.chaveDeData(dataStr), updatedAt: new Date().toISOString() };
+        // Nao deixa apagar a marca de saldo anterior ao editar descricao/valor
+        const prev = list[idx];
+        list[idx] = {
+            ...prev,
+            desc,
+            value,
+            date: dataStr,
+            chave: this.chaveDeData(dataStr),
+            updatedAt: new Date().toISOString(),
+            saldo_anterior: !!prev.saldo_anterior
+        };
         this._save(list);
         try { if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync(); } catch (_) {}
         return true;
@@ -3265,13 +3361,15 @@ const CongService = {
     },
     totaisDoMes(chave) {
         const entries = this.entriesDoMes(chave);
-        const ent = entries.filter(e => e.type === "entrada").reduce((s, e) => s + e.value, 0);
-        const sai = entries.filter(e => e.type === "saida").reduce((s, e) => s + e.value, 0);
+        const ent = entries.filter(e => e.type === "entrada").reduce((s, e) => s + (Number(e.value) || 0), 0);
+        const sai = entries.filter(e => e.type === "saida").reduce((s, e) => s + (Number(e.value) || 0), 0);
         return { ent, sai, saldo: ent - sai };
     },
     chavesComMovimentacao() {
         const set = new Set(this._load().map(e => e.chave));
-        return Array.from(set).sort();
+        // Sempre inclui o mes calendario atual (mesmo sem lancamento manual)
+        set.add(this.chaveAtual());
+        return Array.from(set).filter(Boolean).sort();
     },
 };
 
@@ -3331,6 +3429,7 @@ const Screens = {
 
     _painelCongregacao() {
         const chaveCong = CongService.chaveAtual();
+        CongService.ensureSaldoAnterior(chaveCong);
         const { ent, sai, saldo } = CongService.totaisDoMes(chaveCong);
         const corSal = saldo >= 0 ? "var(--green)" : "var(--red)";
         return `
@@ -3339,7 +3438,7 @@ const Screens = {
                 <div style="font-size:15px;font-weight:800;letter-spacing:0.01em">Caixa Congregacao</div>
                 <button class="btn btn-border btn-small" style="width:auto;padding:9px 14px" data-nav="cong_mes_list">Caixa</button>
             </div>
-            <div class="small-note" style="margin-bottom:8px">Relatorio do mes atual — ${escapeHtml(formatarChave(chaveCong))}</div>
+            <div class="small-note" style="margin-bottom:8px">Mes calendario atual — ${escapeHtml(formatarChave(chaveCong))}</div>
             <div class="linha-painel bold">
                 <span>Saldo do mes</span>
                 <span style="color:${corSal}">${formatarMoeda(saldo)}</span>
@@ -3363,6 +3462,7 @@ const Screens = {
     },
 
     congMesList() {
+        CongService.ensureSaldoAnterior(CongService.chaveAtual());
         const chaves = CongService.chavesComMovimentacao();
         let listaHtml = "";
         if (!chaves.length) {
@@ -3390,8 +3490,14 @@ const Screens = {
     },
 
     congMesDetalhe(chave) {
+        CongService.ensureSaldoAnterior(chave);
         const { ent, sai, saldo } = CongService.totaisDoMes(chave);
-        const entries = CongService.entriesDoMes(chave).sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+        const entries = CongService.entriesDoMes(chave).sort((a, b) => {
+            // Saldo anterior no topo
+            if (a.saldo_anterior && !b.saldo_anterior) return -1;
+            if (!a.saldo_anterior && b.saldo_anterior) return 1;
+            return String(a.date || "").localeCompare(String(b.date || ""));
+        });
         const corSal = saldo >= 0 ? "var(--green)" : "var(--red)";
         let rowsHtml = "";
         if (!entries.length) {
@@ -3401,11 +3507,12 @@ const Screens = {
                 const isEnt = e.type === "entrada";
                 const sinal = isEnt ? "+" : "-";
                 const valClass = isEnt ? "ent" : "sai";
+                const tipoLbl = e.saldo_anterior ? (isEnt ? "  SALDO ANT." : "  SALDO ANT.") : (isEnt ? "  ENTRADA" : "  SAIDA");
                 rowsHtml += `
                 <div class="entry-row bg-card">
                     <div class="entry-info">
                         <div class="entry-desc">${escapeHtml(e.desc)}</div>
-                        <div class="entry-sub">${escapeHtml(e.date)}${isEnt ? "  ENTRADA" : "  SAIDA"}</div>
+                        <div class="entry-sub">${escapeHtml(e.date)}${tipoLbl}</div>
                     </div>
                     <div class="entry-value ${valClass}">${sinal}${formatarMoeda(e.value)}</div>
                     <button class="btn-edit" data-action="congEditar" data-id="${e.id}">Ed</button>
@@ -4273,7 +4380,8 @@ const Modals = {
             ? backups.slice(0, 10).map(b => `
                 <div class="backup-item">
                     <span class="label">${escapeHtml(b.label)}</span>
-                    <button data-fn="${escapeHtml(b.filename)}" class="btn-restore-local">Mesclar</button>
+                    <button data-fn="${escapeHtml(b.filename)}" data-mode="merge" class="btn-restore-local btn btn-small btn-accent2" style="width:auto">Mesclar</button>
+                    <button data-fn="${escapeHtml(b.filename)}" data-mode="replace" class="btn-restore-local btn btn-small" style="width:auto;background:#C2410C;color:#fff">Substituir</button>
                 </div>`).join("")
             : `<div class="small-note">Nenhum backup interno ainda.</div>`;
         const pasta = BackupService.pastaSelecionada();
@@ -4286,9 +4394,17 @@ const Modals = {
 
             <div class="field-label" style="font-weight:700;color:var(--accent);font-size:13px">Nuvem (Firebase)</div>
             <div class="small-note" id="fb-status-note" style="margin-bottom:8px">${escapeHtml(fbStatus)}</div>
-            <div class="small-note" style="margin-bottom:8px">Salva e restaura automaticamente. Os dados sao mesclados — nada e apagado.</div>
+            <div class="small-note" style="margin-bottom:8px">
+                <b>Sincronizar</b> = envia este aparelho para a nuvem (substitui o backup la).<br>
+                <b>Mesclar</b> = traz da nuvem sem apagar o que ja tem aqui.<br>
+                <b>Substituir</b> = apaga o local e usa so o que esta na nuvem.
+            </div>
             <div class="btn-row">
-                <button class="btn btn-small btn-green" id="btn-fb-sync">Sincronizar agora</button>
+                <button class="btn btn-small btn-green" id="btn-fb-sync">Sincronizar</button>
+            </div>
+            <div class="btn-row" style="margin-top:6px">
+                <button class="btn btn-small btn-accent2" id="btn-fb-merge">Mesclar da nuvem</button>
+                <button class="btn btn-small" style="background:#C2410C;color:#fff" id="btn-fb-replace">Substituir pelo da nuvem</button>
             </div>
 
             <div class="separador"></div>
@@ -4297,16 +4413,16 @@ const Modals = {
             <div class="small-note" style="margin:6px 0 8px">
                 ${fsOk
                     ? (pasta
-                        ? `Pasta salva: <b>${escapeHtml(pasta)}/Backups</b> — proximos backups vao para ela.`
-                        : `Na primeira vez, o app pede a pasta onde salvar. Depois usa a mesma.`)
-                    : `Seu navegador baixa o arquivo JSON (sem escolha de pasta).`}
+                        ? `Pasta: <b>${escapeHtml(pasta)}/Backups</b>`
+                        : `Na primeira vez o app pede a pasta de salvamento.`)
+                    : `O arquivo JSON sera baixado pelo navegador.`}
             </div>
             ${fsOk ? `<button class="btn btn-small btn-accent2" id="btn-escolher-pasta" style="margin-bottom:8px">${pasta ? "Trocar pasta" : "Escolher pasta"}</button>` : ""}
 
-            <div class="field-label" style="font-weight:700;color:var(--gold);font-size:13px;margin-top:8px">Restaurar (mescla, nao apaga)</div>
-            <div class="small-note" style="margin-bottom:6px">Backups internos do app:</div>
+            <div class="field-label" style="font-weight:700;color:var(--gold);font-size:13px;margin-top:8px">Restaurar arquivo local</div>
+            <div class="small-note" style="margin-bottom:6px">Backups internos — escolha mesclar ou substituir:</div>
             <div id="lista-backups">${listaHtml}</div>
-            <div class="field-label" style="margin-top:10px">Ou abra um arquivo .json do aparelho:</div>
+            <div class="field-label" style="margin-top:10px">Ou escolha um arquivo .json:</div>
             <input type="file" id="input-arquivo-backup" accept="application/json,.json" class="field" style="padding:8px">
             <div style="height:8px"></div>
             <button class="btn btn-border" id="btn-fechar">Fechar</button>
@@ -4314,27 +4430,41 @@ const Modals = {
             onOpen: () => {
                 document.getElementById("btn-fechar").onclick = closeModal;
 
-                const btnFb = document.getElementById("btn-fb-sync");
-                if (btnFb) btnFb.onclick = async () => {
-                    Toast.ok("Sincronizando com Firebase...");
+                document.getElementById("btn-fb-sync").onclick = async () => {
+                    Toast.ok("Enviando backup completo para o Firebase...");
                     const r = await FirebaseSync.pushNow();
+                    if (r.ok) Toast.ok("Nuvem atualizada com os dados deste aparelho.");
+                    else Toast.erro(r.error || "Falha ao sincronizar.");
+                    Modals.abrirBackup();
+                };
+
+                document.getElementById("btn-fb-merge").onclick = async () => {
+                    Toast.ok("Mesclando da nuvem...");
+                    const r = await FirebaseSync.mesclarDaNuvem();
                     if (r.ok) {
                         App.svc = new FinanceService(DataStore.load());
-                        Toast.ok("Sincronizado (dados mesclados).");
+                        Toast.ok("Mesclado com a nuvem.");
                         App.refreshCurrent();
-                    } else {
-                        Toast.erro(r.error || "Falha no Firebase. Confira as regras do Firestore.");
-                    }
+                    } else Toast.erro(r.error || "Falha ao mesclar.");
+                    Modals.abrirBackup();
+                };
+
+                document.getElementById("btn-fb-replace").onclick = async () => {
+                    if (!confirm("SUBSTITUIR todos os dados deste aparelho pelo backup da nuvem? O que so existe aqui sera perdido.")) return;
+                    Toast.ok("Substituindo pelos dados da nuvem...");
+                    const r = await FirebaseSync.substituirPelaNuvem();
+                    if (r.ok) {
+                        App.svc = new FinanceService(DataStore.load());
+                        Toast.ok("Dados substituidos pelo backup da nuvem.");
+                        App.refreshCurrent();
+                    } else Toast.erro(r.error || "Falha ao substituir.");
                     Modals.abrirBackup();
                 };
 
                 document.getElementById("btn-criar").onclick = async () => {
                     const res = await BackupService.criarBackup();
                     if (res.ok) {
-                        const msg = res.method === "filesystem"
-                            ? `Backup salvo em ${res.folder}`
-                            : "Backup baixado / salvo internamente.";
-                        Toast.ok(msg);
+                        Toast.ok(res.method === "filesystem" ? `Salvo em ${res.folder}` : "Backup criado.");
                         Modals.abrirBackup();
                     } else Toast.erro("Falha ao criar backup.");
                 };
@@ -4347,7 +4477,7 @@ const Modals = {
                 };
 
                 document.querySelectorAll(".btn-restore-local").forEach(btn => {
-                    btn.onclick = () => Modals.confirmaRestoreLocal(btn.dataset.fn);
+                    btn.onclick = () => Modals.confirmaRestoreLocal(btn.dataset.fn, btn.dataset.mode || "merge");
                 });
                 document.getElementById("input-arquivo-backup").onchange = (ev) => {
                     const file = ev.target.files && ev.target.files[0];
@@ -4357,29 +4487,40 @@ const Modals = {
         });
     },
 
-    confirmaRestoreLocal(filename) {
+    confirmaRestoreLocal(filename, mode) {
+        mode = mode === "replace" ? "replace" : "merge";
+        const titulo = mode === "replace" ? "Substituir pelos dados do backup?" : "Mesclar backup?";
+        const nota = mode === "replace"
+            ? "Os dados atuais deste aparelho serao SUBSTITUIDOS pelo backup."
+            : "Os lancamentos serao mesclados — nada do que ja existe sera apagado.";
         openModal(`
-        <div class="modal-hdr" style="color:var(--orange)">Mesclar backup?</div>
+        <div class="modal-hdr" style="color:var(--orange)">${titulo}</div>
         <div class="separador" style="background:var(--orange)"></div>
         <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:10px">Backup: ${escapeHtml(BackupService.nomeCurto(filename))}<br><b>Os lancamentos serao mesclados</b> — nada do que ja existe sera apagado.</div>
+            <div class="small-note" style="margin-bottom:10px">Backup: ${escapeHtml(BackupService.nomeCurto(filename))}<br>${nota}</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn btn-green" id="btn-restaurar">Mesclar</button>
+                <button class="btn ${mode === "replace" ? "" : "btn-green"}" style="${mode === "replace" ? "background:#C2410C;color:#fff" : ""}" id="btn-restaurar">${mode === "replace" ? "Substituir" : "Mesclar"}</button>
             </div>
         </div>`, {
             onOpen: () => {
                 document.getElementById("btn-cancelar").onclick = closeModal;
                 document.getElementById("btn-restaurar").onclick = async () => {
-                    const res = await BackupService.restaurarLocal(filename);
+                    let res;
+                    if (mode === "replace") {
+                        const rec = await DataStore.getLocalBackup(filename);
+                        if (!rec) { Toast.erro("Backup nao encontrado."); closeModal(); return; }
+                        res = await DataStore.replaceData(rec.content);
+                    } else {
+                        res = await BackupService.restaurarLocal(filename);
+                    }
                     closeModal();
                     if (res.ok) {
                         App.svc = new FinanceService(DataStore.load());
                         try { FirebaseSync.scheduleSync(); } catch (_) {}
-                        Toast.ok("Backup mesclado."); App.refreshCurrent();
-                    } else {
-                        Toast.erro(res.error || "Falha ao mesclar.");
-                    }
+                        Toast.ok(mode === "replace" ? "Dados substituidos." : "Backup mesclado.");
+                        App.refreshCurrent();
+                    } else Toast.erro(res.error || "Falha.");
                 };
             }
         });
@@ -4387,27 +4528,44 @@ const Modals = {
 
     confirmaRestoreArquivo(file) {
         openModal(`
-        <div class="modal-hdr" style="color:var(--orange)">Mesclar arquivo?</div>
+        <div class="modal-hdr" style="color:var(--orange)">Como restaurar o arquivo?</div>
         <div class="separador" style="background:var(--orange)"></div>
         <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:10px">Arquivo: ${escapeHtml(file.name)}<br><b>Os lancamentos serao mesclados</b> — nada do que ja existe sera apagado (se o arquivo for valido).</div>
+            <div class="small-note" style="margin-bottom:10px">Arquivo: ${escapeHtml(file.name)}</div>
+            <div class="small-note" style="margin-bottom:10px"><b>Mesclar</b> = junta com o que ja tem.<br><b>Substituir</b> = apaga o local e usa so o arquivo.</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn btn-green" id="btn-restaurar">Mesclar</button>
+            </div>
+            <div class="btn-row" style="margin-top:8px">
+                <button class="btn btn-green" id="btn-merge">Mesclar</button>
+                <button class="btn" style="background:#C2410C;color:#fff" id="btn-replace">Substituir</button>
             </div>
         </div>`, {
             onOpen: () => {
                 document.getElementById("btn-cancelar").onclick = closeModal;
-                document.getElementById("btn-restaurar").onclick = async () => {
-                    const res = await BackupService.restaurarDeArquivo(file);
+                const run = async (mode) => {
+                    let res;
+                    if (mode === "replace") {
+                        let raw;
+                        try { raw = await file.text(); } catch (e) { Toast.erro("Nao leu o arquivo."); return; }
+                        const validation = DataStore.validateBackup(raw);
+                        if (!validation.ok) { Toast.erro(validation.error); return; }
+                        res = await DataStore.replaceData(validation.data);
+                    } else {
+                        res = await BackupService.restaurarDeArquivo(file);
+                    }
                     closeModal();
                     if (res.ok) {
                         App.svc = new FinanceService(DataStore.load());
                         try { FirebaseSync.scheduleSync(); } catch (_) {}
-                        Toast.ok("Arquivo mesclado."); App.refreshCurrent();
-                    } else {
-                        Toast.erro(res.error || "Falha ao mesclar. Dados atuais mantidos.");
-                    }
+                        Toast.ok(mode === "replace" ? "Substituido pelo arquivo." : "Arquivo mesclado.");
+                        App.refreshCurrent();
+                    } else Toast.erro(res.error || "Falha.");
+                };
+                document.getElementById("btn-merge").onclick = () => run("merge");
+                document.getElementById("btn-replace").onclick = () => {
+                    if (!confirm("Substituir TODOS os dados locais por este arquivo?")) return;
+                    run("replace");
                 };
             }
         });
