@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Caixa Moriah">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Caixa%20Moriah%22%2C%22short_name%22%3A%22Caixa%20Moriah%22%2C%22description%22%3A%22Sistema%20Financeiro%20Igreja%20Moriah%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22background_color%22%3A%22%23F1F5F9%22%2C%22theme_color%22%3A%22%232563EB%22%2C%22lang%22%3A%22pt-BR%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAKcUlEQVR42u2dW2wU5xmG3%2F%2BfMWcHB2ywIS6lgEUggEgMUkQRatqkQqUUoUQ0QlGlkCqKetPTRdXcVb2per6qqoKiHi%2BiVKEpCYpIC4Q4at0UknBIMKQJJrJLHQ7hYAPememFZcDxLnua2ZnZeR6JG7Nez8y%2Bz%2F9938zsrgSQYQyHIB6CIAhuvAjG8DrEhOUQABUAIl%2FlK36BqA5UAAAEAKAFYgiGcHHTtLGLtg0E9fgi1ON%2BndjRYhCAUGSWfK9fEqVwCT3E8fomRQaX4EOcr3ncIrgEH7IsgkvwIcsiuAQfsiyCJfyQ9IE51RWA4EOSq4El%2FJDlamAIP6SFKCqBJfyQ5UpgCX989Gxv5iDEnC9D%2BJMR%2FI4nPuLAxNAOWcKfjFWfahBP3gzhT167QzWoXSWwhD95vT7VoHb5M4Q%2F2UMu1SDaSuBy6JIZ%2FE8%2BFyJEQ8UtEKt%2FbdsX2qJo8mgIf%2FoCSjUIrxXiY1FSuDpTDcKj7ArA6p%2BsIFINqqsCDMEpX4EZkms4BLP6J7f9oC2qLKdUgDoKGNUgwgqQ5dU%2Fbasr1aD0vFIB6jRIVIPSMGHahBzxQMgLU%2ByMENcBgBkAAAFofyCDwzAVAKgAAAgAgAAACMAADJkZhKkAQAUAQAAABABAAAAEAEAAAAQAQAAABABAAAAEAEAAAAQAQAAABABAAAAEAEAAAAQAQAAABABAAAAESD9J%2B%2BKMnu3NfCtMhfANMSkNfbFt5EszECAToUcGBCD0yIAABB4ZEIDQIwMCEHpkQABCjwzZFIDQI0PmBCD08RznehDCJfSQ5ergEnrIsgwuoYcsy%2BASesiyDIkUIN%2BBQop0kZY2iNuhIdMgACAAAAIAIAAAAgAgAAACACAAAAIAIAAAAgAgAEB9kIlPhSh2Z2IW7zTlmFABABAAEAAAAQAYgiHzdG1qlyQN7Cr9d1o2DCEApDvw1TCwa3JqhUCADDKwa7K6NtXm%2BdfsPI0AkJzgx1VhkioCAhD8TIuAAAQ%2F0yIgAMHPtAgIQPjH0dTWWPJjL%2FRfqlqEOCVAAMJfVuCL%2FW4lQsQpQSYEqPc7GysJfjWhL%2FV5y5EhrpaIWyEyFv6mtsbIwh%2FG3wrjwhwCEP5Yg1%2Ft366lBMwAEVPtx4QXat%2FKDX8SaGprLLktqtVcQAVIcPgLPUcaw1%2FJ9tSiEiBAgsNfzXPF2fKkadsQoA77%2FqQGv5LtjLoKIADhz7QECED4My0BAtQJaQ1%2F3NuPACmg1heHsnQcEIDVP9P7gQApX%2FXqJfyl7k%2FYVQABWDEzvV8IQO%2Bf6eOCAKySmd4%2FBGD1z%2FTxQQBWx0zvJ7dDQ%2Bjse8nT3%2F%2FqSZKe%2FF6D5s4zid1WBKiz8v6zp4d14VxQ%2FIV3pYaJ0pRpRs2zjObMM1q83Kqt3aTqOFX7ngEEyGhbkMuN%2FBu6EujsmUDHD0t7d3lasNhq41ZHdzZXIUIQ7v5W%2B8kTzABQMu%2B96%2Bs3P87pwtkgCfmnBYLac%2FlioBef9bT1qdLicenjQEcP%2Bur9T6DzA4HODdxU4Le%2FHNbsuUafWmC14G6jTy%2ByshYBIIL%2BP0xOHPE1eFmaMq3wY65dlfY8n9Mbr%2Fny%2FfyPuToknToZ6NRJTwdeHnm%2B5ascrV5n1TzbhHK8qpkDECAj%2Ff%2B69Y4%2Bv9GRJPn%2BSO%2F%2FwYlAu5%2FzdPH8%2BKbF96Uzfb7md9iC4X%2Fm58Pq6y2v4Rm8LP1jr6eeI76%2B%2BYOG2OcAZoAMYq00tdFo6b1Wmx5zCj5u6Erh59izM1d2%2BJkBIHG0zi3chkwq8Ca069ekg6%2BP73la2oy%2BuNnRBz2BXtszch3g8W83aGqj1Ncb6P3jvt5509fQIAJAQug%2FHRSsEm3t%2BRuEvt5AueHxP3%2FsG66aZhr1n%2FZu%2FKxhgtTSatTSarRitdWXH5WOHvJ19KCfjGpIBKIhyZ9HGgTSlUuBjh3y9Zc%2FeHkfs%2FQ%2Bq8lTC%2FXx46VxXWn6jOJDreNKy1dZPfpkMtZeKkDEEoT5%2BUDVsH%2B3p%2F27vZIee2ez0fqHC88GEyeN%2F1kuJ73zpq8lK9O1pqZGgKQEqd5ZstJqw1cdTbuj8GreepeRMSOV5Fae3Z7T0vusrg4iAKSMyVOkhx93tWhp8RV8aqNRxzKr42%2BP7eN9Xzr8r7E%2F2%2F6TYc2aYzSn3WjhEquFS2zeCoIAECtDg9KffpXTxq2uVt5fXIINWxz1nQp06ePbnwr1clJ%2Fb6D%2B3kD%2F7vI1YaK0aq2jz21wNGEiQzAkCM%2BTnv9dTscOFT9DM32G0VPfd7X0XitTxgXd69ekrlc8%2FfpHw7e9zkAFgFAZvRKcy0nnBwJ1v%2Bqre783ro%2BXpBf%2BmNP8jgkFzwKNMu0Ooy1fd3VuINDhN3ydPOar71Sg4eHi2zPQH2j3czlt%2Flq8EaQCpIgwbgdw3ZELVl%2Fa4ujBTfnP9AxekQ687JX8nDNajNatd7TtOw16%2BhcTtObBm887v8OqqcDp0be7fV27Wpv9RoCUUMvvyFrzoFPwDTDdr3oarKBFsXbsFeSHNjv61g8b9IWvjJfN9wtfiKvV8UKADGOM9MAGp2Cv3r3PC%2B3vfPYhR26ee9%2FyXVSjBYKa0bHMqqU1fxX45z4vbz%2Ffc8TXn58p72a44euSn8enSTF%2FpzdDcArngDA%2FLcGYkVZo5%2B9z4%2F7vymXp0Ou%2BVq8bu056nvRWt6%2B3un3NnGV09wqr9s8Ytd5l1Ng0VqbcsPTfDwPt2emNe8%2BAtVJru42t%2F0eABM8BtXxjzIrVVn97weQ9p9%2F1iqfOtYXfxXX2fzfv%2FBzFuaWr2vHTwqeElqy0mjI13nnptvqd2NFiiGP947jS%2FQ%2Fkj8L5jwIdK%2FPOTa%2BE0WFGi9H6R5ya7N%2FtcswMkNI2KGw61zoFb1E48IkVvuMeq0e2uZq30JR1EWy05bqn0%2BqJ77pqnG5ibX9ogWiDxgyjnWsdde0Zv3z39wZ6711fCxbbGy3Osk6rZZ1Wly8G6jkS6PT7vs58GOjCuZFbrUcvsE2eIjU2GTXPNmqfP%2FIutKaZJpTjE8oMVOwBi7YNBMQxHtL63QB7d3na%2B2J1nwxXbPUvRwBaoBRXgVRi0nNcbDX2QP3NAknIf5j7VSy%2FVICUV4FESmCiC3%2FYVREBqATh59%2BkZz9K3lSGYQbiuEUud%2FUvpX2nAlAFMr39NkybIL5ZIM0SlLLdUaz%2BVAAkqMvwRzYEUwWQIA3hLyen3ApR5zNBEofjJAlqo7QL4qsCSa0G5WxP1Ks%2FMwAS1FX4K6Hi1ZzrAsmg3DtG42iJyhWw0vBX0p1U1c4gQTolqJUIlVSeWoafIbjO2qFyRLg1nGHKUGm7Fdedr1UPtFSB9FeDaqpDGPNFteGv5sRMKGd0kKD%2BJEjiMB92%2BEMTAAkQIY6WJ4xT8qGe00cCRKhVrx%2FW9ajQL2ohASJEPeSGeTE2kqu6SIAIUQQ%2F7PBHJgASZFuGqE5pRnEbTqT39SBBNoSoxTn8qO5Bi%2FzGNiSApIa%2FJgIgAiQx%2BKPYetoZIPyJrQBUA0jiQhnrqowIEHeHkIi2BBEIflwkqi9HBIKfaQGQgdAjAFIQdgAAAAAAAAAAgFD5P0QDUq6OtExmAAAAAElFTkSuQmCC%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAbxklEQVR42u3debCddXkH8Od9z7lk3yAJWUiQEEIIIAgqFKpCbQcLTKUVtS51UKmVsbT1j3bqTKvO1Jl2puvYsWOn2Gmn4FhbHVJxaVUWJQrKImIQEiSJAW42st%2Bb5Z5z3v5xJ0Vtgrn3vOecd%2Fl8Zhhbl3vPec973%2B%2F397zLiQAAaiexCaAesizLfu4BIUkcE6AmUpsAABQAAEABAAAUAABAAQAAyskVv1BgJ3PlfmEPLu4oABMAAEABAAAUAABAAQAAFAAAQAEAABQAAEABAABOigd1QE34OmDABAAAFAAAQAEAACqvaRPUwznv3ZnZCthPOFkbP7XA9SAKAA7cgGOKgqAAIOwBx6HjHIeUAgUAgQ84VikECgACH3AsUwgUAIQ%2BUPvjnDKgAPhjAFAGlAEFQOgDKAMoAIIfoJbHSkVAARD6AKYCyoACIPgBTAVQAAQ%2FgCKAAiD4ARQBFADBD6AIoAAIfgBFgGNSm0D4Azg%2BmwBgxwIwDVAAEPwAikAVOQUg%2FAEcx00AsMMAmAaYAAh%2FABzfFQA7BwCO89VgHGKHAKilup8SqP0EQPgDOP4rAD58AORALSQ%2BcACo3ymB2k0AhD8A8qFmBUD4AyAnalYAhD8A8qJmBUD4AyA3alYAhD8A8qNmBUD4w4ltuG2%2BjQA1zpHEhwaCf9XNu2wYeAlVvEWwkhMA4Q8TW%2FWbBkD9ciXxIUF9g%2F94TAOgHpOASk0AhD90v7o3DYB65EziQwHBbxoA9ZsEVKIACH%2Fo7QpeEYDqlYDSnwIQ%2FtDb8O%2FlzwX5YwIg%2FKEkAW0aANWYBJR2AiD8YTCrc9MAqEYeJTY2CH7TAKjfJKDpIwPB3%2B1rUQSgfEp3CsDqH%2BHvdYF86l5i44Lgz5NpAHVXllMBpSkAwh%2FBXy6KAEpAsaU%2BJhD%2BXj%2FUTykmAFb%2FCP5yMw3AFMAEQPhDDVfNpgHUUdHzK7HxQECaBkD9JgGeAwCCfyDvWRGAwSrsKQCrf4S%2F9w9VUNQ8S2wsEHyDZhpAHRTtVIDbAEH42y5QQ4WbAFj9I%2BBMA8AUoPdcBAiCv5DbTBGA3irUKQCrf4Q%2Fth9VVqScS2wUEFxFZxpA1RThVICLAEH4265QQ4WYAFj9I6AwDcAUoL9cBAiCv5TbXBGA7gz8FIDVP8If2586GnT%2BmQCA4DENgBoa6PkHq38EP3lSBCijQV0L4C4AEP4%2BJzABsPoHgWIaAHWYApgAgPD3%2BYEJgNU%2FCA7TAKjDFMBdACD4a%2FPZKgLwIqcAQPj7nKGG%2Bn4KwPgfgUARmAZQRP08DWACgPDH5w8mAFb%2FOPBjGgB1mAK4CBAHe4VCYEMNOQUAAApA7xj%2FA0Bx8tIEAABMAAAABSAnxv8AUKzcNAEAABMAAEAByIHxPwAULz9NAADABAAAUAAAAAVgopz%2FB4Bi5qgJAACYAAAACgAAoABMhPP%2FAFDcPDUBAAATAABAAQAAFAAAQAE4IRcAAkCxc9UEAABMAAAABQAAUAAAAAUAAFAAAAAFAACoTwHwDAAAyF%2Fe%2BWoCAAAmAACAAgAAKAAAgAIAACgAAIACAAAoAACAAgAAKAAAgAIAACgAAIACAAAoAACAAgAAKAAAgAIAACgAAKAAAAAKAACgAAAACgAAoAAAAAoAAKAAAAAKAACgAAAACgAAoAAAAAoAAKAAAAAKAACgAAAACgAAoAAAgAIAACgAAIACAAAoAACAAgAAKAAAgAIAACgAAIACAAAoAACAAgAAKAAAgAIAACgAAIACAAAoAACAAgAACgAAoAAAAAoAAKAAAAAKAECfbbhtvo0AXWraBCB8yv45rLp5lw0CCgAIfWUAUABA6CsDgAIAQl8ZABQAEPrKACgAIPRRBkABAKFP7fYLhQAFAIQ%2BpgM2CAoACH2UAVAAQOijDIACAAIfZQAUABD6KAOgAIDQRxkABQCEPsoAKAAg9KnX%2Fq0QoADgoAimAzYICgBCH5QBUAAQ%2BqAMgAKA0AdlABQAhD4oA6AAIPBBGQAFAKEPygAoAAh9UAZAAUDoQ43%2BfhUCFACEPpgO2CAoAAh9UAZQABD6gDKAAoDQB5QBFACEPqAMoAAg9AFlAAUAgQ8oAygACH2gXschhUABQOgDpgM2iAKA0AeUARQAhD6gDKAAIPQBZQAFoLa6%2BUNQHoAyHrsYvNQmAAAFAABQAAAABQAAUAAAAAUAAFAAAAAFAABQAAAABQAAUAAAAAUAAFAAAAAFAABQAAAABQAAUAAAAAUAABQAAEABAAAUAABAAQAAFAAAQAEAABQAAEABAAAUAABAAQAAFAAAQAEAABQAAEABAAAUAABAAQAAFAAAUAAAAAUAAFAAAIAKadoE9Nqqm3fl%2FjM33DbfhsX%2BDSYAAIACAAAoAACAAgAACoBNAAAKAACgAAAACgAAoAAAAAoAAFASHgUMUDA775qW%2B89ccP0hGxYFAGDQ1t2wrDClQjlQAACoQNjnUQ6UAgUAgIoF%2FmRKgUKgAABQ0dA%2F2UKgDCgAALV1LBDX3eC9X3nnVjuEAgBQj%2FDjRcemH4qAAgAg9GtcBJQBBQBA8JsK2BgKAIDgVwRQAACEfu2KgDKgAAAIflMBG2OAfBkQIPwZ%2BFQAEwAAwW8agAIAIPgVARQAAMGvCJAL1wAAwp%2FCFgFMAAAEv2kAJgAAwt80ABMAgIqF%2F9zFs3L7WXuHD1SiBJgEKAAAlQn%2BPIN%2Bor%2BjbMXAKQEFAKCU4d%2BPsO%2F29ZShFJgG5MM1AIDw73HIHvunLCWlDK%2FXdQEmAIDgt9Lvw%2Fso4mTAKQETAED4WznX%2BP2ZBpgAUFAbbptvI1DJ8K9q2JdxMuC6ABMAQPj3bTVMsbaFSYACAAh%2FwV%2FTbaMEKACA8Bf8Nd1WSoACAAh%2FwV%2FTbacEKACA8Bf8NS0CSsBLcxcAlMyqm3cV8nXlfbfHIMOf3mzXQdwx4O4ABQAEf59eXx5FYBDhL%2Fj7t437XQSUgONzCgCEf6Feq%2FCvTxHodwlAAQDhX9DX3O%2Fwd65%2FsCWg39teCVAAQPgX8LUPIvyp3zRACVAAQPgX6D0IfyVACVAAgJrpZ%2Fgb%2BRe7BPTzs1ECFACw%2Bq%2FJexH8pgEoAEDNVv9CRQkwBVAAAOGPEqAEKACA8EcJqGcJUAAA4YHPUQEAKP%2FqX2goAaYACgAg%2FFEClAAFABD%2BKAFKgAIACAd8zjWlAAClX%2F0LBSXAFEABAAqm1wdT4a8EKAEKACAE8PmjAABVXv07%2BNPr%2FaDqUwAFAABMAACs%2FjEFqMMUQAEAHOyxX5gAABR31eQgzyD2j6pOARQAwMESarhfKwBArVd32E%2FqSgEACr9KclCnCPtL1aYACgAAmAAA1GM1h%2F1GAQDIQS%2FGow7iFG3%2FqdJpAAUAAEwAAKz%2BMQWowxRAAQAAEwAAq39MAeowBVAAAMAEAKB6qzWwXykAQI489x%2F7vwIAYJWG%2FUsBAKx%2BwN%2BBAgBgdYb9rFCaNgEAE%2FWlz7bjgXvax%2F3PVq5J4123ihcTAABAAQDKL%2B%2Fznsay5ZNl5X3tee9vZb0OwIwGqJT%2F%2Flw71n2t3Z8VVBrRaEQ0mhFDpyQxbUbE9BkRM%2BckMe%2FUJObOT%2BL0JUksOiOJU6ZUrQHY18pOAQCYpE5n%2FJ%2BxsYjDh7I4sO%2F46ZgkEQsWJXH2eWmsXDP%2Br2nJ56%2BZBqAAAPVi%2FD%2BJsMwidgxnsWO4Hd%2B%2BO2LGzIiXv7oRv%2FBLacw9LSnteyqzuYtnxd7hA7n%2BXVx551YFAIATGzkY8e272%2FHgve24%2BPI0fuXXmzFjZulGAJSciwABBqTTiXjkW534%2B48ejfWPdEwAUACAenD1%2F7jRkYjP3taKe7%2FYLs1rzux%2FCgBQHx7%2F29sV9d13teMbXylJCTABKP3fh2sAAArka2vbcfrSJM69cPDrsyyL2L0zi23PZvHCjiz2vJDFwf0Rh0ay2LntxA3gRz%2FsxF%2F84dGYNSeJWbOTmDU3Ys68JE5bmMSpC5M4bUES02f6rBUAoJaM%2F09s7e3tuPUjaUyb3v%2FfPToS8cSjndi4vhObnurE4UOTKw6jByNGD2ax%2FbnjF4Vp0yNOX5rEojPSWLwsiUVLk1i4JIlGs%2F%2F7YZ53AygAAEzawf1ZrPtqO375jY2%2B%2Fc5nN2Vx%2F1fb8dT3O9Huw1mIQ6MRmzdmsXnji7%2BsORSx9MwkzlyZxvKzk1h%2BdhpTp9kfFACAGnngnna89g2Nnj9B8IUdWXz5P9qx4QeDvwuhNRax5ekstjw9XgpWrE7jpt8XU73iIkDgpLgAsL%2BOHhkfxffSg%2Fe24xN%2FNlaI8Pd3YgIAMHA%2Fb%2BXZbkUcORxxaDSLncNZDD%2BbxfpHOrHj%2BXwvjf%2Fh9zpx8eX5r9M6nYg7%2F60V33tA8NeZAgD0XdkvAGw0I6bPjJg%2Bc%2FzK9tUXRVx9XSO2PJ3F2jtasWtbPkVgy486kWXj3yWQlyyL%2BM9%2FbsUPHhb%2BP7k%2F1vFCQKcAAHJy5sokbvnQUCw9M5%2FEHj0YsW93vlOFr61tC38UAIC8DZ0S8fZbmjE0lM%2FP270zvwKw5eks7v%2Bftg8JBQCgF2bNSeKSK%2FO5hW%2F%2F3nxeU5ZFfOHTLc%2Fw5%2F%2B4BgCgB867KIkH7%2B3%2B5xw5kk9iP%2FFoJ3YMT%2F5nJUnEOeencc4FSSxamsbD69onvIhw5Zo0bnxPM0b2Z3HwQBYH90Xs25PFtufGHwy0a1vWl2cNoAAAXXIL4MSdcVYaSdL9t%2Ba1jubzeh765uTP%2By9fkcQNv9WM%2BYuSnygUL32dw%2FQZEdNnJLFg8f%2F%2F77XbEbu2ZbFpQyeeeTKLzRsn98TBIv%2B9XHnnVgUA4CfV5RHAp0wZf9zt6Eh3P2folO4vKBw9GPHMU5MrAOecn8bb39%2FM9RG9jcb4Y4BPX9qIy68evy3xuc1ZbPhBJx5%2FqJPrdQ8T2S%2FrdieAAgDQI1OnJzE60l2Y5fF9AJs3diY1iZgyNeI3bmr2%2FPn8aRqxbEUSy1Y04vW%2F1ohnN2Xx%2Fe924tCICxYUAIASyuOCu6k5FIDnfzy5F3LexWnMGMC39p1xVhJnnNWwA%2FWYuwCggDbcNt9GqIA8VrDzT%2B%2F%2BFMDuXZN7HQsXJz5EBQCAiTh8aPxxwd2YPiNi3vzuQ3hk%2F%2BT%2Bdx3PC1IAAFMAJmbrM52uTwEsfVk%2Bh%2Bijk7yVcNd25%2BAVAEAJYELWP9L98vmCS%2FM5RE%2B2iGx4vNP1FAMFAFACamPvC1k89p3uCsCUqRHnX5LPIfqUKZP7342ORHzlcy0fqAIAKAH8PEePRHz6k61od5mbl1zRmHRw%2F6wZsyZ%2FHcHD93fi8%2F%2FaqtSDehjnNkAoWQlYdfMuG6OgNm3oxNrb210%2FyGbm7CSuvj6%2F2%2BDmntbdhYTfe6ATP%2Fze0bj4skac%2B%2FIklpxp7agAMHDCAPqv3Y44ejji0GgWO4azGP5xFusf6e5Z%2Bz%2Fp2rc0Yuq0%2FF7v4mXd30lw5HDEg%2Fe148H7xv%2F%2FVAdQAACq5pknO%2FHhW44O5HdffV0jt4v%2FjjlzZf7387%2FULYJbn%2BnEv%2F9TK5YsT%2BL0pUksWprE7HmeKaAAAHBcr35dmuvo%2F5g585JYemYSz23pz219Rw6P3wWx%2FpEX%2F71Zc5JYtiKJ5SuSWLkmjYVLFAIFAKDmGs2IX72xGa9%2BXe%2Fm6q%2F8xUY8t2VwV%2FQf2JfFE49m8cSjEfG5dsyem8SaV6RxwaVpLD9bGVAAAGpmyfIkrn9bM854WW9D8KLL0rjvy0ns3V2Mh%2Fvs35vFA%2Fe044F72rFgURKXXdWIS65Iozlkn%2BgXl3EADMC8%2BUnc%2BJ5m%2FM4fD%2FU8%2FCMimkPjFxcW0c5tWdz1mVb87Z%2BOxcPrOrl8iRImAADFOeAOjX%2FD3iVXpLHi3DSSPk%2B%2BV1%2BUxuVXN%2BKBe9qF3D4H9mWx9vZWPPbgeDmaPdepARMAgCrIIg6PRhzYO7gv2nnDjY248FXFPvRv3pjFJ%2F%2B8FcM%2FNgpQAAAqoNWK2Lh%2B%2FMl6f%2FfhsXjysf63gDSNuPHdzXjNNY2%2BTyAm4uD%2BLP7142Oxc5sSoAAAlbB3%2BICNEBH7dmfx6U%2B2Yu3trb5PA5Ik4lduaMRNf9CM0xYWtwWMjkR85h9bMXbUfqkAAANx5Z1bbYQeeXhdJ%2B74h1a0xvr%2Fu89alcbvfngorv%2FNZsw5tZhFYOe2LO77ctvfiwIAUD0b13fic%2F%2FSGsjV743G%2BAOIPvhnQ%2FHW327GOeenhXvM77e%2B3o6D%2B50KyJu7AAAKYP0jnbj7C%2B14%2Fa8N5la9NB3%2F%2BuHzL0lj5EAWT34%2Fiw2Pd%2BKZpzpx5PBgt01rLOKhb3biqusadhQFAKB3VqxO46bf%2F%2BnDY5aNf9Xv4UNZ7BzO4tlNWTz%2BcCd2Due3Mv3GV9qxYnUSZ60a7BJ8xqwkLr0yiUuvTKPTidj2bBZbnu7E81uyeH5rFi9sz%2Fp%2B3cLjDykACgDAACRJxJSpEVOmJjFnXhIr10RcdV0jnnq8E1%2F6bDv27Oq%2BCGRZxOf%2FpR23fiSNU6YU432n6fjTCpcsfzF8x8Yi%2FuuOVjz2YP9awM5tWezZlcW8%2BZ4NkNtnaxMA%2FValK67PvTCN939oKF52Tj7BtG9PFvd%2BsdgXvQ0NRUyfceL3O3teEue%2BPM39DoPnNmf2RxMAgOKYNj3inR8Yik%2F99VgMb%2B0%2BpL719Xa84oo0Fiwq52p34eIk3nHLeLyMHMhi4%2FosvvONdjy7qbtts%2F35LC6wu5kAAP3lVsCXdsqUiHfc0oxpM7r%2FWZ1OxFfvbFdiu8yYlcTFl6fxvj8aije%2Bs9nVHQb79mT%2BThQAgOKZPS%2BJa9%2Bcz2D1ycc6sXVTtW59u%2FTKNK550%2BQv5Bs9aB9TAAAK6qLL0jh7dT6H1q%2BvbVdu%2B1x2VSNmzZncqY1%2BPBFQAQDosSpfeHXNm%2FJ5zv4zT3Vi88ZqTQHSNGLF6sR%2BqAAAVM%2BiM5LcvnHvnruqNwWYO8nHDhfl1kgF4AQ2fmqBmzSholwIePKuvraRyyN1N22o3hRgstOR6TPr%2FfeRd76aAAADU%2BXx62mnJ3HhK4sxBVh7Ryvu%2F2o7Dh8qxrbZ88LkCs2pOa8v6%2F7NlAoAQI%2B87tp8rgXodgqwb3fE%2F3y%2BHX%2F1oaOx9vZWbH1mcBOFdiviRz%2Bc3O9fvMyAWQEAKIH5BZoCRIx%2Fl8HD6zrxT385Fh%2F%2F6Fjc%2FYV2bH%2Buv2Xgvq9M7pv90jRi%2BdkiSwEABibv85xVH8NeVZApwM%2FatT2Le7%2FUjk98bCz%2B5k%2FG4r%2FuaMUTj3Z69rW77dZ4iZnsY45XrE5j6rTi7ndlvD7Go4ABejkFWJTEBa9M4%2FHvdv%2FFOffc1Y53fzD%2Fw%2FbeF7J46P4sHrp%2F%2FDXOPTWJpS9LYuHiJBYsTuK0BUnMnhcxfWZy0mXm6JGIQyNZ7BjOYvPGLL7%2F3U7s2z35cnHJFdarCgBAyVx9bSN%2B8FAnsi4X18emAHl98dAJC8HuLPbuzmL9z%2Fz7jWbEtOlJTJkWcXjkxG%2Fm6Sc68bE%2FyO%2BpPQsWJXH%2BJQpA3mxRYMKcBpjEFODS8j8XoN2KOLg%2Fixe2ZzHSp8fyJknEdW%2FN5zRKr%2Fa3st4e25MC4FkAAD%2BtqNcCFN0vvL4RK1Zbq%2FYiV21VgD5YsDiJ8y%2F1dMCJOO%2BiNK75jYadp0wTAICJqsNDWUwBTt5Fl6Xx1vc1cx3912U%2FUwCAnvJY4IlbuDi%2Fi9mqOgUYGoq4%2Fm3NeNNNzVwepezvQAEATAFMAQosSSIufGUav%2FfRoXj1a1P7V5kLgAsBwRSA40wBliSx5hX9nQK85eZmvPMDzXjNNY04c2USzQLdAD51WsSrXpvGrR8Zije%2FtxlzTk3s%2F33KU88BAAo3BZi7eFal3%2BPV1zXiiUf791yAqdMiVl2QxqoLIiIa0WpFDG%2FNYvtz4%2F%2FseD6L7c93YrRPt%2FadtjCJs1cncc75aaxck0aj2Z%2F9CgUAYOBTgPMuTuOJRwfzdMBmM2LZWUksO%2Buni8PIwfGnAu7fk8W%2BPVns2xOxf08WowcjjhzO4vChiCOHx%2F%2Fvo0dO%2FPMbjYhZc5KYMSti5uwk5s1PYt788fe9ZFka02bYB4qgp7OWc967M7OJofrW3bAs959Z9SlA2d15eyseWXf8ArNyTRrvurU468terP77efqrV6cA0jK%2BaAAqvHqkLznqLgCgkKsh52w1AKv%2F3lIAADABqCEFADAFYOIFoAQNwOp%2FwAXAdQCAEmAEYL8pXn6aAABADSkAQG56NR41BTAAKML%2BUrUnX%2FalADgNACgBGoD9pFi5aQIAWCUxifxP7NcmAAD9OViaApgADGL%2FqGqp7VsBcBoAUAIqlP%2BJ%2FaLseWkCAJRu1aQE0K%2F9ocqntBQAAEo%2FAWASn2G%2Ff6FvCIR66cU3BR7jGwOp2uq%2Fn6fLTQAAB398%2FjXU9wLgYkCol16vooSA8Lf6NwEAlACEfynDvxYTAAAlAJ9zTQuA0wBgCiAcKOLnO6jV%2FyBy0QQAUAIQ%2FlG%2Fx1gPrACYAoASoAQg%2FAeXhyYAgNDA51hDAy0ApgBgCiA8GPTnV8fVvwkAoAQg%2FE0ATAEAJQDhX5f8MwEAhAo%2BpxoqzOrblwRBffXyC4OOx5cICf66r%2F5NAIBC6PfB2CpT%2BFOgAuBaAFAClADhX4fwL0reFS50nQqAeuv36YAIpwTqEPzCv8ATAIBBHaRNA4R%2FHRVy7G4KAAxiEmAaUM2iVZTwL9qpbhMAwCTANED4mwCYAgAmAaYB1ShURQr%2FIl7oXugr75UAYNAlQBEoX%2FAL%2F5PjFABQeIM%2BmO8dPuDUQIm2lbF%2FBSYApgBAkSYBJgLFXfEXNfyL%2FIybUjx8RwkAilYCFIFiBb%2Fwr2gBUAKAopaAOpaBIp4OEf4T5xoAoHSKeI732Lnvql4rUOT355x%2FxScApgBAWaYBVZkMFL3MFDX4y%2FLdNqX7Ah4lAChbCShTGSjLBEP417AAKAFAmUtAkUpBWU9XCP98NB02gCo4FgplKwInCuE8i0FVrktwrt8EwBQAqOQ0gPKGf9lW%2FxElvgugjBsbEBYIfxMAkwDANICSF7kyL0ZL%2FxwAkwDANMDnJn9qOAEwCQBMAwS%2F8K9xAVACAEVA8Av%2FmhYAJQBQBAS%2F8D85lfsuANcEAFUNH9tfvpgAmAQApgGCX%2FgrAEoAoAwIfeGvACgBgCIg%2BIV%2F3QuAEgAoAoJf%2BNe0ACgBgDIg9IV%2FTQuAEgAoAoJf%2BNe0ACgBgEIg8IV%2FTQuAEgAoA0K%2F7uFf2wKgCAAKgcCva%2FArAEoAoBTULuyFvwKgBAC1Kgceeyz8FQBFAEDwU70vA7JTAOA4rwDYOQBwfD8OG%2BMlOCUAIPhNAOw0ADiOmwCYBgAg%2BBUARQAAwV8iTgHYuQAcn00AMA0AEPwKAIoAgOBXAFAEAAS%2FAoAiACD4FQAUAQDBrwCgDAAIfQUARQBA8CsAKAMAQl8BQBkAhD4KgDKgDABCHwVAIVAIAIGPAqAQKASAwEcBQCkAhD0KAAoCIOABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMb9L81XxNwYSGcBAAAAAElFTkSuQmCC%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
 <link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
@@ -1515,11 +1517,8 @@ const DataStore = (function () {
             await _putState(_dados);
             // Backup automático na nuvem (só se estiver ligada nesta sessão)
             try {
-                if (typeof CloudService !== "undefined") CloudService.scheduleSync();
-            } catch (e) { /* cloud opcional */ }
-            try {
-                if (typeof GitHubSync !== "undefined") GitHubSync.scheduleSync();
-            } catch (e) { /* github opcional */ }
+                if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync();
+            } catch (e) { /* firebase opcional */ }
             return true;
         } catch (e) {
             console.error("Erro ao salvar:", e);
@@ -2041,11 +2040,14 @@ const BackupService = (function () {
 
     // ── Criar backup manual ────────────────────────────────────────────────
     async function criarBackup() {
+        // Primeira vez: pede a pasta (Chrome/Android). Depois reutiliza.
+        if (supportsFS() && !_backupsHandle) {
+            try { await escolherPasta(); } catch (_) {}
+        }
         const content = DataStore.exportJSON();
         const filename = `caixa_backup_${_timestamp()}.json`;
 
-        // Sempre guarda também uma cópia local (IndexedDB) para listagem/restauração
-        // rápida dentro do próprio app, independente de onde o usuário salvou o arquivo.
+        // Sempre guarda também uma cópia local (IndexedDB)
         await DataStore.saveLocalBackup(filename, content);
 
         if (_backupsHandle) {
@@ -2084,7 +2086,7 @@ const BackupService = (function () {
     async function restaurarLocal(filename) {
         const rec = await DataStore.getLocalBackup(filename);
         if (!rec) return { ok: false, error: "Backup nao encontrado." };
-        return DataStore.replaceData(rec.content);
+        return DataStore.mergeData(rec.content);
     }
 
     // ── Restaurar a partir de um arquivo escolhido pelo usuário (upload) ───
@@ -2099,7 +2101,7 @@ const BackupService = (function () {
         if (!validation.ok) {
             return { ok: false, error: `Backup invalido: ${validation.error}` };
         }
-        return DataStore.replaceData(validation.data);
+        return DataStore.mergeData(validation.data);
     }
 
     return {
@@ -2112,471 +2114,202 @@ const BackupService = (function () {
     };
 })();
 
-// ========== cloud.js ==========
-// ══════════════════════════════════════════════════════════════════════════
-// CLOUD.JS — backup automático na nuvem (Supabase)
-//
-// Regras:
-//  - Senha fixa CLOUD_PIN = "3003" só para LIGAR a nuvem e RESTAURAR da nuvem.
-//  - Backup físico (arquivo) e restauração de arquivo NÃO pedem senha.
-//  - Sync automático só roda se a nuvem estiver "ligada" nesta sessão
-//    (depois de digitar a senha) e se URL + chave anon estiverem configuradas.
-//  - Quem abre o link sem ligar a nuvem só mexe no IndexedDB local.
-// ══════════════════════════════════════════════════════════════════════════
+// ========== firebase-sync.js ==========
+// FIREBASE SYNC — auto save/restore no Firestore (sem senha).
+// Documento: caixa_moriah/estado  |  Conflito: mescla por id (nunca apaga).
+const FirebaseSync = (function () {
+    const firebaseConfig = {
+        apiKey: "AIzaSyAK9AZSesaCowhvO9QYZhQz4yJDcfRhyAs",
+        authDomain: "caixa-moria.firebaseapp.com",
+        projectId: "caixa-moria",
+        storageBucket: "caixa-moria.firebasestorage.app",
+        messagingSenderId: "1030892067214",
+        appId: "1:1030892067214:web:c43dafbc35a3ef41232cdf"
+    };
 
-const CloudService = (function () {
-    const CLOUD_PIN = "3003";
-    const LS_URL = "caixa_moriah_supabase_url";
-    const LS_KEY = "caixa_moriah_supabase_key";
-    const SS_UNLOCKED = "caixa_moriah_cloud_unlocked";
-    const TABLE = "caixa_backups";
-    const MAX_VERSIONS = 15;
-    const DEBOUNCE_MS = 2500;
-
+    const DEBOUNCE_MS = 2000;
+    let _db = null;
+    let _ready = false;
     let _timer = null;
     let _syncing = false;
     let _lastStatus = "";
+    let _lastError = "";
+    let _lastAt = null;
 
-    function getConfig() {
-        return {
-            url: (localStorage.getItem(LS_URL) || "").trim().replace(/\/$/, ""),
-            key: (localStorage.getItem(LS_KEY) || "").trim(),
-        };
-    }
-
-    function setConfig(url, key) {
-        localStorage.setItem(LS_URL, (url || "").trim().replace(/\/$/, ""));
-        localStorage.setItem(LS_KEY, (key || "").trim());
-    }
-
-    function isConfigured() {
-        const c = getConfig();
-        return !!(c.url && c.key && c.url.startsWith("http"));
-    }
-
-    function isUnlocked() {
-        return sessionStorage.getItem(SS_UNLOCKED) === "1";
-    }
-
-    function unlock(pin) {
-        if (String(pin) !== CLOUD_PIN) return { ok: false, error: "Senha incorreta." };
-        if (!isConfigured()) return { ok: false, error: "Configure a URL e a chave do Supabase antes." };
-        sessionStorage.setItem(SS_UNLOCKED, "1");
-        return { ok: true };
-    }
-
-    function lock() {
-        sessionStorage.removeItem(SS_UNLOCKED);
-    }
-
-    function askPin(titulo) {
-        return new Promise((resolve) => {
-            openModal(`
-            <div class="modal-hdr" style="color:var(--accent)">${escapeHtml(titulo || "Senha da nuvem")}</div>
-            <div class="modal-scroll">
-                <div class="small-note" style="margin-bottom:8px">Digite a senha para continuar.</div>
-                <input type="password" id="cloud-pin-input" class="field" placeholder="Senha" inputmode="numeric" autocomplete="off">
-                <div class="btn-row" style="margin-top:10px">
-                    <button class="btn btn-border" id="cloud-pin-cancel">Cancelar</button>
-                    <button class="btn btn-accent" id="cloud-pin-ok">Confirmar</button>
-                </div>
-            </div>`, {
-                onOpen: () => {
-                    const input = document.getElementById("cloud-pin-input");
-                    input.focus();
-                    const finish = (val) => { closeModal(); resolve(val); };
-                    document.getElementById("cloud-pin-cancel").onclick = () => finish(null);
-                    document.getElementById("cloud-pin-ok").onclick = () => finish(input.value);
-                    input.onkeydown = (ev) => {
-                        if (ev.key === "Enter") finish(input.value);
-                    };
-                }
-            });
-        });
-    }
-
-    async function ensureUnlocked(titulo) {
-        if (isUnlocked()) return { ok: true };
-        const pin = await askPin(titulo || "Ligar nuvem");
-        if (pin === null) return { ok: false, error: "Cancelado." };
-        return unlock(pin);
-    }
-
-    function _headers(key, extra = {}) {
-        return Object.assign({
-            "apikey": key,
-            "Authorization": `Bearer ${key}`,
-            "Content-Type": "application/json",
-        }, extra);
-    }
-
-    async function uploadNow() {
-        if (!isConfigured() || !isUnlocked()) {
-            return { ok: false, error: "Nuvem nao ligada ou nao configurada." };
-        }
-        if (_syncing) return { ok: false, error: "Sync em andamento." };
-        _syncing = true;
-        _lastStatus = "enviando...";
+    function _ensureInit() {
+        if (_ready && _db) return true;
         try {
-            const { url, key } = getConfig();
-            const content = DataStore.exportJSON();
-            let entryCount = 0;
-            try {
-                const parsed = JSON.parse(content);
-                entryCount = (parsed.data && parsed.data.entries) ? parsed.data.entries.length
-                    : (parsed.entries ? parsed.entries.length : 0);
-            } catch (e) { /* ignore */ }
-
-            const body = [{
-                content,
-                entry_count: entryCount,
-                app_label: "Caixa Moriah",
-            }];
-
-            const res = await fetch(`${url}/rest/v1/${TABLE}`, {
-                method: "POST",
-                headers: _headers(key, { "Prefer": "return=minimal" }),
-                body: JSON.stringify(body),
-            });
-
-            if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                _lastStatus = "erro ao enviar";
-                return { ok: false, error: `Falha na nuvem (${res.status}): ${txt.slice(0, 120)}` };
+            if (typeof firebase === "undefined") {
+                _lastError = "SDK Firebase nao carregou.";
+                return false;
             }
-
-            // Limpa versões antigas (mantém as mais recentes)
-            try { await _pruneOld(url, key); } catch (e) { console.warn("prune:", e); }
-
-            _lastStatus = "ok " + new Date().toLocaleTimeString("pt-BR");
-            return { ok: true };
-        } catch (e) {
-            _lastStatus = "erro de rede";
-            return { ok: false, error: e.message || "Erro de rede ao enviar backup." };
-        } finally {
-            _syncing = false;
-        }
-    }
-
-    async function _pruneOld(url, key) {
-        const list = await listVersions();
-        if (!list.ok || list.items.length <= MAX_VERSIONS) return;
-        const toDelete = list.items.slice(MAX_VERSIONS);
-        for (const item of toDelete) {
-            await fetch(`${url}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(item.id)}`, {
-                method: "DELETE",
-                headers: _headers(key),
-            });
-        }
-    }
-
-    async function listVersions() {
-        if (!isConfigured()) return { ok: false, error: "Nuvem nao configurada.", items: [] };
-        const { url, key } = getConfig();
-        try {
-            const res = await fetch(
-                `${url}/rest/v1/${TABLE}?select=id,created_at,entry_count,app_label&order=created_at.desc&limit=20`,
-                { headers: _headers(key) }
-            );
-            if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                return { ok: false, error: `Falha ao listar (${res.status}): ${txt.slice(0, 120)}`, items: [] };
+            if (!firebase.apps || !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
             }
-            const rows = await res.json();
-            return {
-                ok: true,
-                items: (rows || []).map(r => ({
-                    id: r.id,
-                    created_at: r.created_at,
-                    entry_count: r.entry_count || 0,
-                    label: _fmtDate(r.created_at) + `  (${r.entry_count || 0} lanc.)`,
-                })),
-            };
+            _db = firebase.firestore();
+            _ready = true;
+            _lastError = "";
+            return true;
         } catch (e) {
-            return { ok: false, error: e.message || "Erro de rede.", items: [] };
+            _lastError = e.message || String(e);
+            console.warn("Firebase init:", e);
+            return false;
         }
     }
 
-    function _fmtDate(iso) {
-        try {
-            const d = new Date(iso);
-            const pad = (n) => String(n).padStart(2, "0");
-            return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        } catch (e) {
-            return iso || "";
-        }
-    }
-
-    async function fetchVersionContent(id) {
-        if (!isConfigured()) return { ok: false, error: "Nuvem nao configurada." };
-        const { url, key } = getConfig();
-        try {
-            const res = await fetch(
-                `${url}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(id)}&select=content`,
-                { headers: _headers(key) }
-            );
-            if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                return { ok: false, error: `Falha ao baixar (${res.status}): ${txt.slice(0, 120)}` };
-            }
-            const rows = await res.json();
-            if (!rows || !rows[0] || !rows[0].content) {
-                return { ok: false, error: "Backup nao encontrado na nuvem." };
-            }
-            return { ok: true, content: rows[0].content };
-        } catch (e) {
-            return { ok: false, error: e.message || "Erro de rede." };
-        }
-    }
-
-    async function restoreVersion(id) {
-        const got = await fetchVersionContent(id);
-        if (!got.ok) return got;
-        return DataStore.replaceData(got.content);
-    }
-
-    /** Agenda upload automático (debounce). Só age se nuvem ligada. */
-    function scheduleSync() {
-        if (!isConfigured() || !isUnlocked()) return;
-        clearTimeout(_timer);
-        _timer = setTimeout(() => {
-            uploadNow().then((r) => {
-                if (!r.ok) console.warn("Cloud sync:", r.error);
-            });
-        }, DEBOUNCE_MS);
+    function docRef() {
+        return _db.collection("caixa_moriah").doc("estado");
     }
 
     function statusText() {
-        if (!isConfigured()) return "Nuvem nao configurada";
-        if (!isUnlocked()) return "Nuvem configurada — desligada neste aparelho";
-        return _syncing ? "Sincronizando..." : (_lastStatus ? `Nuvem ligada (${_lastStatus})` : "Nuvem ligada");
-    }
-
-    return {
-        getConfig, setConfig, isConfigured, isUnlocked,
-        unlock, lock, ensureUnlocked, askPin,
-        uploadNow, listVersions, restoreVersion, scheduleSync, statusText,
-        CLOUD_PIN, // não expor na UI; só referência interna
-    };
-})();
-
-// ========== github-sync.js ==========
-// GITHUB SYNC — grava/carrega estado em arquivo JSON no repositório GitHub.
-// Token fica só no localStorage deste aparelho (não no HTML público).
-const GitHubSync = (function () {
-    const LS_OWNER = "caixa_moriah_gh_owner";
-    const LS_REPO = "caixa_moriah_gh_repo";
-    const LS_PATH = "caixa_moriah_gh_path";
-    const LS_BRANCH = "caixa_moriah_gh_branch";
-    const LS_TOKEN = "caixa_moriah_gh_token";
-    const LS_ENABLED = "caixa_moriah_gh_enabled";
-    const DEBOUNCE_MS = 2500;
-
-    let _timer = null;
-    let _syncing = false;
-    let _lastSha = null;
-    let _lastStatus = "";
-
-    function getConfig() {
-        return {
-            owner: (localStorage.getItem(LS_OWNER) || "").trim(),
-            repo: (localStorage.getItem(LS_REPO) || "").trim(),
-            path: (localStorage.getItem(LS_PATH) || "data/caixa-moriah.json").trim() || "data/caixa-moriah.json",
-            branch: (localStorage.getItem(LS_BRANCH) || "main").trim() || "main",
-            token: (localStorage.getItem(LS_TOKEN) || "").trim(),
-            enabled: localStorage.getItem(LS_ENABLED) === "1",
-        };
-    }
-
-    function setConfig({ owner, repo, path, branch, token, enabled }) {
-        if (owner != null) localStorage.setItem(LS_OWNER, String(owner).trim());
-        if (repo != null) localStorage.setItem(LS_REPO, String(repo).trim());
-        if (path != null) localStorage.setItem(LS_PATH, String(path).trim() || "data/caixa-moriah.json");
-        if (branch != null) localStorage.setItem(LS_BRANCH, String(branch).trim() || "main");
-        if (token != null) localStorage.setItem(LS_TOKEN, String(token).trim());
-        if (enabled != null) localStorage.setItem(LS_ENABLED, enabled ? "1" : "0");
-    }
-
-    function isConfigured() {
-        const c = getConfig();
-        return !!(c.owner && c.repo && c.path);
-    }
-    function canWrite() {
-        const c = getConfig();
-        return isConfigured() && !!c.token && c.enabled;
-    }
-    function canRead() {
-        return isConfigured() && getConfig().enabled;
-    }
-
-    function _toBase64(str) {
-        try { return btoa(unescape(encodeURIComponent(str))); }
-        catch (e) {
-            const bytes = new TextEncoder().encode(str);
-            let bin = "";
-            bytes.forEach((b) => { bin += String.fromCharCode(b); });
-            return btoa(bin);
+        if (typeof firebase === "undefined") return "Firebase: SDK nao carregou (verifique a internet)";
+        if (!_ready && !_ensureInit()) return "Firebase: erro ao iniciar" + (_lastError ? " — " + _lastError : "");
+        if (_syncing) return "Firebase: sincronizando...";
+        if (_lastStatus === "ok") {
+            const when = _lastAt ? (" — " + new Date(_lastAt).toLocaleString("pt-BR")) : "";
+            return "Firebase: conectado" + when;
         }
+        if (_lastStatus === "err") return "Firebase: erro no ultimo envio" + (_lastError ? " — " + _lastError : "");
+        if (!navigator.onLine) return "Firebase: offline (salva no aparelho; envia ao reconectar)";
+        return "Firebase: pronto (auto-save ligado)";
     }
-    function _fromBase64(b64) {
-        try { return decodeURIComponent(escape(atob(b64))); }
-        catch (e) {
-            const bin = atob(b64);
-            const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-            return new TextDecoder().decode(bytes);
+
+    function _mergeEntries(localEntries, remoteEntries) {
+        const map = new Map();
+        (remoteEntries || []).forEach(e => { if (e && e.id != null) map.set(String(e.id), e); });
+        (localEntries || []).forEach(e => { if (e && e.id != null) map.set(String(e.id), e); });
+        return Array.from(map.values());
+    }
+
+    function _mergeCultos(localC, remoteC) {
+        const out = Object.assign({}, remoteC || {});
+        for (const [mes, ed] of Object.entries(localC || {})) {
+            out[mes] = Object.assign({}, out[mes] || {}, ed || {});
         }
-    }
-    function _apiHeaders(token, extra) {
-        const h = Object.assign({
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }, extra || {});
-        if (token) h["Authorization"] = "Bearer " + token;
-        return h;
-    }
-    function _pathEnc(p) {
-        return p.split("/").map(encodeURIComponent).join("/");
-    }
-    function _contentsUrl(c) {
-        return `https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${_pathEnc(c.path)}?ref=${encodeURIComponent(c.branch)}`;
-    }
-    function _rawUrl(c) {
-        return `https://raw.githubusercontent.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/${encodeURIComponent(c.branch)}/${_pathEnc(c.path)}?t=${Date.now()}`;
+        return out;
     }
 
     async function fetchRemote() {
-        if (!canRead()) return { ok: false, error: "GitHub nao configurado/ativado." };
-        const c = getConfig();
+        if (!_ensureInit()) return { ok: false, error: _lastError || "Firebase indisponivel." };
         try {
-            const res = await fetch(_contentsUrl(c), {
-                headers: _apiHeaders(c.token || undefined),
-                cache: "no-store",
-            });
-            if (res.status === 404) return { ok: true, missing: true, content: null, sha: null };
-            if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                if (!c.token) throw new Error("API " + res.status);
-                return { ok: false, error: `GitHub API (${res.status}): ${txt.slice(0, 140)}` };
-            }
-            const json = await res.json();
-            _lastSha = json.sha || null;
-            const content = json.content ? _fromBase64(String(json.content).replace(/\n/g, "")) : null;
-            return { ok: true, missing: false, content, sha: json.sha };
+            const snap = await docRef().get();
+            if (!snap.exists) return { ok: true, missing: true, data: null };
+            const data = snap.data() || {};
+            return {
+                ok: true,
+                missing: false,
+                data: {
+                    entries: Array.isArray(data.entries) ? data.entries : [],
+                    cultos_edicoes: data.cultos_edicoes || {},
+                    updatedAt: data.updatedAt || null
+                }
+            };
         } catch (e) {
-            try {
-                const res2 = await fetch(_rawUrl(c), { cache: "no-store" });
-                if (res2.status === 404) return { ok: true, missing: true, content: null, sha: null };
-                if (!res2.ok) return { ok: false, error: "Raw GitHub (" + res2.status + ")" };
-                return { ok: true, missing: false, content: await res2.text(), sha: null };
-            } catch (e2) {
-                return { ok: false, error: e.message || e2.message || "Falha de rede GitHub." };
-            }
+            _lastError = e.message || String(e);
+            return { ok: false, error: _lastError };
         }
     }
 
     async function pushNow() {
-        if (!canWrite()) return { ok: false, error: "GitHub sem token ou desativado." };
+        if (!_ensureInit()) return { ok: false, error: _lastError || "Firebase indisponivel." };
         if (_syncing) return { ok: false, error: "Sync em andamento." };
         _syncing = true;
-        _lastStatus = "enviando...";
-        const c = getConfig();
         try {
-            if (!_lastSha) {
+            const local = DataStore.load();
+            let remoteEntries = [];
+            let remoteCultos = {};
+            try {
                 const remote = await fetchRemote();
-                if (!remote.ok) { _syncing = false; return remote; }
-                if (remote.sha) _lastSha = remote.sha;
-            }
-            const body = {
-                message: "Caixa Moriah auto-save " + new Date().toISOString(),
-                content: _toBase64(DataStore.exportJSON()),
-                branch: c.branch,
-            };
-            if (_lastSha) body.sha = _lastSha;
-            const putUrl = `https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${_pathEnc(c.path)}`;
-            const res = await fetch(putUrl, {
-                method: "PUT",
-                headers: _apiHeaders(c.token, { "Content-Type": "application/json" }),
-                body: JSON.stringify(body),
-            });
-            const txt = await res.text();
-            let json = null;
-            try { json = JSON.parse(txt); } catch (_) {}
-            if (!res.ok) {
-                if (res.status === 409 || (json && /sha/i.test(json.message || ""))) {
-                    _lastSha = null;
-                    _syncing = false;
-                    return pushNow();
+                if (remote.ok && remote.data) {
+                    remoteEntries = remote.data.entries || [];
+                    remoteCultos = remote.data.cultos_edicoes || {};
                 }
-                _lastStatus = "erro";
-                _syncing = false;
-                return { ok: false, error: `GitHub (${res.status}): ${(json && json.message) || txt.slice(0, 160)}` };
+            } catch (_) {}
+
+            const mergedEntries = _mergeEntries(local.entries, remoteEntries);
+            const mergedCultos = _mergeCultos(local.cultos_edicoes, remoteCultos);
+            const payload = {
+                entries: mergedEntries,
+                cultos_edicoes: mergedCultos,
+                updatedAt: new Date().toISOString(),
+                app: "Caixa Moriah",
+                backup_version: 1
+            };
+            await docRef().set(payload);
+
+            const localIds = new Set((local.entries || []).map(e => String(e.id)));
+            const precisaLocal = mergedEntries.some(e => !localIds.has(String(e.id)));
+            if (precisaLocal) {
+                await DataStore.mergeData({
+                    backup_version: 1,
+                    app: "Caixa Moriah",
+                    data: { entries: mergedEntries, cultos_edicoes: mergedCultos }
+                });
             }
-            if (json && json.content && json.content.sha) _lastSha = json.content.sha;
+
             _lastStatus = "ok";
+            _lastAt = Date.now();
+            _lastError = "";
             _syncing = false;
             return { ok: true };
         } catch (e) {
-            _lastStatus = "erro";
+            _lastStatus = "err";
+            _lastError = e.message || String(e);
             _syncing = false;
-            return { ok: false, error: e.message || "Erro de rede GitHub." };
+            console.warn("Firebase push:", e);
+            return { ok: false, error: _lastError };
         }
     }
 
     function scheduleSync() {
-        if (!canWrite()) return;
         clearTimeout(_timer);
         _timer = setTimeout(() => {
-            pushNow().then((r) => {
-                if (!r.ok) console.warn("GitHub sync:", r.error);
-                else console.log("GitHub sync OK");
+            pushNow().then(r => {
+                if (!r.ok) console.warn("Firebase sync:", r.error);
             });
         }, DEBOUNCE_MS);
     }
 
     async function pullOnBoot() {
-        if (!canRead()) return { ok: false, skipped: true };
+        if (!_ensureInit()) return { ok: false, error: _lastError || "Firebase indisponivel." };
         try {
             const remote = await fetchRemote();
             if (!remote.ok) return remote;
-            if (remote.missing || !remote.content) return { ok: true, applied: false, reason: "arquivo ainda nao existe" };
-            const validation = DataStore.validateBackup(remote.content);
-            if (!validation.ok) return { ok: false, error: "JSON remoto invalido: " + validation.error };
-            const local = DataStore.load();
-            const localEmpty = !local.entries || local.entries.length === 0;
-            if (!localEmpty) return { ok: true, applied: false, reason: "local com dados" };
-            const parsed = typeof remote.content === "string" ? JSON.parse(remote.content) : remote.content;
-            const r = await DataStore.replaceData(parsed);
+            if (remote.missing || !remote.data) {
+                const local = DataStore.load();
+                if (local.entries && local.entries.length) {
+                    const up = await pushNow();
+                    return { ok: up.ok, applied: false, uploaded: !!up.ok, error: up.error };
+                }
+                return { ok: true, applied: false, reason: "nuvem vazia" };
+            }
+            const r = await DataStore.mergeData({
+                backup_version: 1,
+                app: "Caixa Moriah",
+                data: {
+                    entries: remote.data.entries,
+                    cultos_edicoes: remote.data.cultos_edicoes
+                }
+            });
             if (r && r.ok === false) return r;
+            pushNow().catch(() => {});
+            _lastStatus = "ok";
+            _lastAt = Date.now();
             return { ok: true, applied: true };
         } catch (e) {
-            return { ok: false, error: e.message || "Falha ao puxar GitHub." };
+            _lastError = e.message || String(e);
+            return { ok: false, error: _lastError };
         }
     }
 
-    async function restoreFromGitHub() {
-        const remote = await fetchRemote();
-        if (!remote.ok) return remote;
-        if (remote.missing || !remote.content) return { ok: false, error: "Arquivo ainda nao existe no GitHub." };
-        const validation = DataStore.validateBackup(remote.content);
-        if (!validation.ok) return { ok: false, error: validation.error };
-        const parsed = typeof remote.content === "string" ? JSON.parse(remote.content) : remote.content;
-        const r = await DataStore.replaceData(parsed);
-        return r && r.ok === false ? r : { ok: true };
-    }
-
-    function statusText() {
-        if (!isConfigured()) return "GitHub nao configurado";
-        if (!getConfig().enabled) return "GitHub configurado — desativado";
-        if (!getConfig().token) return "GitHub leitura OK (sem token = so baixa)";
-        return _syncing ? "GitHub sincronizando..." : (_lastStatus === "ok" ? "GitHub ativo (auto-save)" : (_lastStatus === "erro" ? "GitHub com erro no ultimo envio" : "GitHub ativo"));
-    }
-
     return {
-        getConfig, setConfig, isConfigured, canWrite, canRead,
-        fetchRemote, pushNow, scheduleSync, pullOnBoot, restoreFromGitHub, statusText,
+        statusText, pushNow, scheduleSync, pullOnBoot, fetchRemote,
+        get lastError() { return _lastError; },
+        get lastStatus() { return _lastStatus; },
     };
 })();
 
+// ========== pdf.js ==========
 // ========== pdf.js ==========
 // ══════════════════════════════════════════════════════════════════════════
 // PDF.JS — equivalente a PDFService do Python (livro-caixa modelo CaixaMoriah)
@@ -3306,12 +3039,12 @@ const App = {
     async init() {
         await DataStore.init();
         try {
-            if (typeof GitHubSync !== "undefined" && GitHubSync.canRead()) {
-                const pull = await GitHubSync.pullOnBoot();
-                if (pull && pull.applied) console.log("Dados restaurados do GitHub na abertura.");
-                else if (pull && !pull.ok) console.warn("GitHub pull:", pull.error);
+            if (typeof FirebaseSync !== "undefined") {
+                const pull = await FirebaseSync.pullOnBoot();
+                if (pull && pull.applied) console.log("Dados mesclados do Firebase na abertura.");
+                else if (pull && !pull.ok) console.warn("Firebase pull:", pull.error);
             }
-        } catch (e) { console.warn("GitHub pullOnBoot:", e); }
+        } catch (e) { console.warn("Firebase pullOnBoot:", e); }
         this.svc = new FinanceService(DataStore.load());
         await migrarDadosLegados(this.svc);
         await this.svc.ensureFixedEntries(chaveAtual());
@@ -4458,289 +4191,85 @@ const Modals = {
             ? backups.slice(0, 10).map(b => `
                 <div class="backup-item">
                     <span class="label">${escapeHtml(b.label)}</span>
-                    <button data-filename="${escapeHtml(b.filename)}" class="btn-restaurar-local">Restaurar</button>
+                    <button data-fn="${escapeHtml(b.filename)}" class="btn-restore-local">Mesclar</button>
                 </div>`).join("")
-            : `<div class="muted-msg" style="padding:8px 0">Nenhum backup local.</div>`;
-
-        const cloudCfg = CloudService.getConfig();
-        const cloudStatus = CloudService.statusText();
+            : `<div class="small-note">Nenhum backup interno ainda.</div>`;
+        const pasta = BackupService.pastaSelecionada();
+        const fsOk = BackupService.supportsFS();
+        const fbStatus = (typeof FirebaseSync !== "undefined") ? FirebaseSync.statusText() : "Firebase indisponivel";
 
         openModal(`
         <div class="modal-hdr" style="color:var(--accent)">Backup e Restauracao</div>
         <div class="modal-scroll">
 
-            <div class="field-label" style="font-weight:700;color:var(--accent);font-size:13px">GitHub (auto-save no repositorio)</div>
-            <div class="small-note" id="github-status-note" style="margin-bottom:6px">${escapeHtml(typeof GitHubSync !== "undefined" ? GitHubSync.statusText() : "—")}</div>
+            <div class="field-label" style="font-weight:700;color:var(--accent);font-size:13px">Nuvem (Firebase)</div>
+            <div class="small-note" id="fb-status-note" style="margin-bottom:8px">${escapeHtml(fbStatus)}</div>
+            <div class="small-note" style="margin-bottom:8px">Salva e restaura automaticamente. Os dados sao mesclados — nada e apagado.</div>
             <div class="btn-row">
-                <button class="btn btn-small btn-accent2" id="btn-github-config">Configurar GitHub</button>
-                <button class="btn btn-small btn-green" id="btn-github-push">Enviar agora</button>
+                <button class="btn btn-small btn-green" id="btn-fb-sync">Sincronizar agora</button>
             </div>
-            <div class="btn-row" style="margin-top:6px">
-                <button class="btn btn-small" style="background:#C2410C" id="btn-github-pull">Restaurar do GitHub</button>
-            </div>
-            <div class="small-note" style="margin:8px 0 12px">Ao lancar (dizimo, oferta…), o app grava neste aparelho e envia o JSON ao GitHub. Ao abrir o link noutro celular, puxa os dados se estiver vazio.</div>
-
-            <div class="field-label" style="font-weight:700;color:var(--accent);font-size:13px">Nuvem (Supabase)</div>
-            <div class="small-note" id="cloud-status-note" style="margin-bottom:6px">${escapeHtml(cloudStatus)}</div>
-            <div class="btn-row">
-                <button class="btn btn-small btn-accent2" id="btn-cloud-config">Configurar</button>
-                <button class="btn btn-small btn-green" id="btn-cloud-ligar">${CloudService.isUnlocked() ? "Nuvem ligada" : "Ligar nuvem"}</button>
-            </div>
-            <div class="btn-row">
-                <button class="btn btn-small btn-accent" id="btn-cloud-sync">Enviar agora</button>
-                <button class="btn btn-small" style="background:#C2410C" id="btn-cloud-restaurar">Restaurar da nuvem</button>
-            </div>
-            ${CloudService.isUnlocked()
-                ? `<button class="btn btn-small btn-border" id="btn-cloud-desligar" style="margin-bottom:6px">Desligar nuvem neste aparelho</button>`
-                : ""}
 
             <div class="separador"></div>
-            <div class="field-label" style="font-weight:700;color:var(--gold);font-size:13px;margin-top:4px">Arquivo no celular (sem senha)</div>
+            <div class="field-label" style="font-weight:700;color:var(--gold);font-size:13px;margin-top:4px">Backup no celular</div>
             <button class="btn btn-green" id="btn-criar">Criar Backup agora</button>
-            <div class="small-note" style="margin:4px 0 8px">
-                ${BackupService.supportsFS()
-                    ? (BackupService.pastaSelecionada()
-                        ? `Pasta: ${escapeHtml(BackupService.pastaSelecionada())}/Backups`
-                        : `Nenhuma pasta escolhida (sera baixado). <button id="btn-escolher-pasta" class="btn btn-small btn-accent2" style="width:auto;display:inline-block;margin-top:4px">Escolher pasta</button>`)
-                    : `O arquivo sera baixado pelo navegador.`}
+            <div class="small-note" style="margin:6px 0 8px">
+                ${fsOk
+                    ? (pasta
+                        ? `Pasta salva: <b>${escapeHtml(pasta)}/Backups</b> — proximos backups vao para ela.`
+                        : `Na primeira vez, o app pede a pasta onde salvar. Depois usa a mesma.`)
+                    : `Seu navegador baixa o arquivo JSON (sem escolha de pasta).`}
             </div>
-            <div class="field-label" style="font-weight:700;color:var(--gold);font-size:13px;margin-top:8px">Restaurar arquivo local:</div>
+            ${fsOk ? `<button class="btn btn-small btn-accent2" id="btn-escolher-pasta" style="margin-bottom:8px">${pasta ? "Trocar pasta" : "Escolher pasta"}</button>` : ""}
+
+            <div class="field-label" style="font-weight:700;color:var(--gold);font-size:13px;margin-top:8px">Restaurar (mescla, nao apaga)</div>
+            <div class="small-note" style="margin-bottom:6px">Backups internos do app:</div>
             <div id="lista-backups">${listaHtml}</div>
-            <div class="field-label" style="margin-top:10px">Ou selecione um arquivo de backup do seu dispositivo:</div>
+            <div class="field-label" style="margin-top:10px">Ou abra um arquivo .json do aparelho:</div>
             <input type="file" id="input-arquivo-backup" accept="application/json,.json" class="field" style="padding:8px">
             <div style="height:8px"></div>
             <button class="btn btn-border" id="btn-fechar">Fechar</button>
         </div>`, {
             onOpen: () => {
                 document.getElementById("btn-fechar").onclick = closeModal;
+
+                const btnFb = document.getElementById("btn-fb-sync");
+                if (btnFb) btnFb.onclick = async () => {
+                    Toast.ok("Sincronizando com Firebase...");
+                    const r = await FirebaseSync.pushNow();
+                    if (r.ok) {
+                        App.svc = new FinanceService(DataStore.load());
+                        Toast.ok("Sincronizado (dados mesclados).");
+                        App.refreshCurrent();
+                    } else {
+                        Toast.erro(r.error || "Falha no Firebase. Confira as regras do Firestore.");
+                    }
+                    Modals.abrirBackup();
+                };
+
                 document.getElementById("btn-criar").onclick = async () => {
                     const res = await BackupService.criarBackup();
-                    if (res.ok) { Toast.ok("Backup criado."); Modals.abrirBackup(); }
-                    else Toast.erro("Falha ao criar backup.");
+                    if (res.ok) {
+                        const msg = res.method === "filesystem"
+                            ? `Backup salvo em ${res.folder}`
+                            : "Backup baixado / salvo internamente.";
+                        Toast.ok(msg);
+                        Modals.abrirBackup();
+                    } else Toast.erro("Falha ao criar backup.");
                 };
-                const btnEscolher = document.getElementById("btn-escolher-pasta");
-                if (btnEscolher) btnEscolher.onclick = async () => {
+
+                const btnPasta = document.getElementById("btn-escolher-pasta");
+                if (btnPasta) btnPasta.onclick = async () => {
                     const res = await BackupService.escolherPasta();
-                    if (res.ok) { Toast.ok(`Pasta selecionada: ${res.name}`); Modals.abrirBackup(); }
-                    else Toast.erro(res.error || "Nao foi possivel selecionar a pasta.");
+                    if (res.ok) { Toast.ok(`Pasta: ${res.name}`); Modals.abrirBackup(); }
+                    else Toast.erro(res.error || "Pasta nao selecionada.");
                 };
-                document.querySelectorAll(".btn-restaurar-local").forEach(btn => {
-                    btn.onclick = () => Modals.confirmaRestoreLocal(btn.dataset.filename);
+
+                document.querySelectorAll(".btn-restore-local").forEach(btn => {
+                    btn.onclick = () => Modals.confirmaRestoreLocal(btn.dataset.fn);
                 });
                 document.getElementById("input-arquivo-backup").onchange = (ev) => {
-                    const file = ev.target.files[0];
+                    const file = ev.target.files && ev.target.files[0];
                     if (file) Modals.confirmaRestoreArquivo(file);
-                };
-
-                const btnGhCfg = document.getElementById("btn-github-config");
-                if (btnGhCfg) btnGhCfg.onclick = () => Modals.githubConfig();
-                const btnGhPush = document.getElementById("btn-github-push");
-                if (btnGhPush) btnGhPush.onclick = async () => {
-                    if (!GitHubSync.canWrite()) {
-                        Toast.erro("Configure owner/repo/token e ative o GitHub.");
-                        return;
-                    }
-                    Toast.ok("Enviando para o GitHub...");
-                    const r = await GitHubSync.pushNow();
-                    if (r.ok) Toast.ok("Dados salvos no GitHub.");
-                    else Toast.erro(r.error || "Falha ao enviar.");
-                    Modals.abrirBackup();
-                };
-                const btnGhPull = document.getElementById("btn-github-pull");
-                if (btnGhPull) btnGhPull.onclick = async () => {
-                    if (!confirm("Substituir os dados deste aparelho pelos do GitHub?")) return;
-                    Toast.ok("Baixando do GitHub...");
-                    const r = await GitHubSync.restoreFromGitHub();
-                    if (r.ok) {
-                        App.svc = new FinanceService(DataStore.load());
-                        Toast.ok("Dados restaurados do GitHub.");
-                        App.refreshCurrent();
-                    } else {
-                        Toast.erro(r.error || "Falha ao restaurar.");
-                    }
-                    Modals.abrirBackup();
-                };
-                document.getElementById("btn-cloud-config").onclick = () => Modals.cloudConfig();
-                document.getElementById("btn-cloud-ligar").onclick = async () => {
-                    const r = await CloudService.ensureUnlocked("Ligar nuvem");
-                    if (r.ok) {
-                        Toast.ok("Nuvem ligada neste aparelho.");
-                        CloudService.scheduleSync();
-                        Modals.abrirBackup();
-                    } else if (r.error && r.error !== "Cancelado.") {
-                        Toast.erro(r.error);
-                    }
-                };
-                document.getElementById("btn-cloud-sync").onclick = async () => {
-                    const r = await CloudService.ensureUnlocked("Enviar para a nuvem");
-                    if (!r.ok) {
-                        if (r.error && r.error !== "Cancelado.") Toast.erro(r.error);
-                        return;
-                    }
-                    Toast.ok("Enviando...");
-                    const up = await CloudService.uploadNow();
-                    if (up.ok) Toast.ok("Backup enviado para a nuvem.");
-                    else Toast.erro(up.error || "Falha ao enviar.");
-                    Modals.abrirBackup();
-                };
-                document.getElementById("btn-cloud-restaurar").onclick = () => Modals.cloudRestoreList();
-                const btnDesligar = document.getElementById("btn-cloud-desligar");
-                if (btnDesligar) btnDesligar.onclick = () => {
-                    CloudService.lock();
-                    Toast.ok("Nuvem desligada neste aparelho.");
-                    Modals.abrirBackup();
-                };
-            }
-        });
-    },
-
-    githubConfig() {
-        const cfg = (typeof GitHubSync !== "undefined") ? GitHubSync.getConfig() : { owner:"", repo:"", path:"data/caixa-moriah.json", branch:"main", token:"", enabled:false };
-        openModal(`
-        <div class="modal-hdr" style="color:var(--accent)">Configurar GitHub</div>
-        <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:8px">
-                Crie um repositorio no GitHub e um <b>Personal Access Token</b> (classic)
-                com permissao <b>repo</b> (ou Contents: Read and write).
-                O token fica so neste aparelho (localStorage), nao no codigo HTML.
-            </div>
-            <div class="field-label">Dono (usuario ou org)</div>
-            <input type="text" id="gh-owner" class="field" placeholder="seu-usuario" value="${escapeHtml(cfg.owner)}">
-            <div class="field-label" style="margin-top:8px">Repositorio</div>
-            <input type="text" id="gh-repo" class="field" placeholder="caixa-moriah-dados" value="${escapeHtml(cfg.repo)}">
-            <div class="field-label" style="margin-top:8px">Caminho do arquivo JSON</div>
-            <input type="text" id="gh-path" class="field" placeholder="data/caixa-moriah.json" value="${escapeHtml(cfg.path)}">
-            <div class="field-label" style="margin-top:8px">Branch</div>
-            <input type="text" id="gh-branch" class="field" placeholder="main" value="${escapeHtml(cfg.branch)}">
-            <div class="field-label" style="margin-top:8px">Token (PAT)</div>
-            <input type="password" id="gh-token" class="field" placeholder="ghp_..." value="${escapeHtml(cfg.token)}">
-            <label style="display:flex;align-items:center;gap:8px;margin:12px 0;font-size:13px">
-                <input type="checkbox" id="gh-enabled" ${cfg.enabled ? "checked" : ""}>
-                Ativar auto-save no GitHub
-            </label>
-            <div class="btn-row" style="margin-top:12px">
-                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn btn-green" id="btn-salvar-gh">Salvar</button>
-            </div>
-        </div>`, {
-            onOpen: () => {
-                document.getElementById("btn-cancelar").onclick = () => Modals.abrirBackup();
-                document.getElementById("btn-salvar-gh").onclick = () => {
-                    GitHubSync.setConfig({
-                        owner: document.getElementById("gh-owner").value,
-                        repo: document.getElementById("gh-repo").value,
-                        path: document.getElementById("gh-path").value,
-                        branch: document.getElementById("gh-branch").value,
-                        token: document.getElementById("gh-token").value,
-                        enabled: document.getElementById("gh-enabled").checked,
-                    });
-                    if (GitHubSync.isConfigured()) {
-                        Toast.ok(GitHubSync.canWrite() ? "GitHub ativo — lancamentos serao enviados." : "GitHub salvo (sem token = so leitura).");
-                        Modals.abrirBackup();
-                    } else {
-                        Toast.erro("Preencha pelo menos dono e repositorio.");
-                    }
-                };
-            }
-        });
-    },
-
-    cloudConfig() {
-        const cfg = CloudService.getConfig();
-        openModal(`
-        <div class="modal-hdr" style="color:var(--accent)">Configurar nuvem (Supabase)</div>
-        <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:8px">
-                Cole a URL do projeto e a chave <b>anon public</b>.
-                Veja o passo a passo no final desta mensagem do chat.
-            </div>
-            <div class="field-label">Project URL</div>
-            <input type="text" id="cloud-url" class="field" placeholder="https://xxxx.supabase.co" value="${escapeHtml(cfg.url)}">
-            <div class="field-label" style="margin-top:8px">anon public key</div>
-            <input type="text" id="cloud-key" class="field" placeholder="eyJhbGciOi..." value="${escapeHtml(cfg.key)}">
-            <div class="btn-row" style="margin-top:12px">
-                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn btn-green" id="btn-salvar-cloud">Salvar</button>
-            </div>
-        </div>`, {
-            onOpen: () => {
-                document.getElementById("btn-cancelar").onclick = () => Modals.abrirBackup();
-                document.getElementById("btn-salvar-cloud").onclick = () => {
-                    const url = document.getElementById("cloud-url").value;
-                    const key = document.getElementById("cloud-key").value;
-                    CloudService.setConfig(url, key);
-                    if (CloudService.isConfigured()) {
-                        Toast.ok("Configuracao salva.");
-                        Modals.abrirBackup();
-                    } else {
-                        Toast.erro("URL ou chave invalidas.");
-                    }
-                };
-            }
-        });
-    },
-
-    async cloudRestoreList() {
-        const gate = await CloudService.ensureUnlocked("Restaurar da nuvem");
-        if (!gate.ok) {
-            if (gate.error && gate.error !== "Cancelado.") Toast.erro(gate.error);
-            return;
-        }
-        Toast.ok("Buscando backups...");
-        const list = await CloudService.listVersions();
-        if (!list.ok) {
-            Toast.erro(list.error || "Falha ao listar.");
-            return;
-        }
-        if (!list.items.length) {
-            Toast.erro("Nenhum backup na nuvem ainda.");
-            return;
-        }
-        const items = list.items.map(it => `
-            <div class="backup-item">
-                <span class="label">${escapeHtml(it.label)}</span>
-                <button data-id="${escapeHtml(it.id)}" class="btn-cloud-restore-item">Restaurar</button>
-            </div>`).join("");
-
-        openModal(`
-        <div class="modal-hdr" style="color:var(--orange)">Restaurar da nuvem</div>
-        <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:8px">Escolha uma versao. Os dados atuais serao substituidos.</div>
-            ${items}
-            <button class="btn btn-border" id="btn-voltar-bk" style="margin-top:8px">Voltar</button>
-        </div>`, {
-            onOpen: () => {
-                document.getElementById("btn-voltar-bk").onclick = () => Modals.abrirBackup();
-                document.querySelectorAll(".btn-cloud-restore-item").forEach(btn => {
-                    btn.onclick = () => Modals.confirmaRestoreCloud(btn.dataset.id);
-                });
-            }
-        });
-    },
-
-    confirmaRestoreCloud(id) {
-        openModal(`
-        <div class="modal-hdr" style="color:var(--orange)">Confirmar restauracao da nuvem?</div>
-        <div class="separador" style="background:var(--orange)"></div>
-        <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:10px">Os dados atuais serao SUBSTITUIDOS pelo backup da nuvem.</div>
-            <div class="btn-row">
-                <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn" style="background:#C2410C" id="btn-restaurar">Restaurar</button>
-            </div>
-        </div>`, {
-            onOpen: () => {
-                document.getElementById("btn-cancelar").onclick = () => Modals.cloudRestoreList();
-                document.getElementById("btn-restaurar").onclick = async () => {
-                    const res = await CloudService.restoreVersion(id);
-                    closeModal();
-                    if (res.ok) {
-                        App.svc = new FinanceService(DataStore.load());
-                        Toast.ok("Backup da nuvem restaurado.");
-                        App.refreshCurrent();
-                    } else {
-                        Toast.erro(res.error || "Falha ao restaurar da nuvem.");
-                    }
                 };
             }
         });
@@ -4748,13 +4277,13 @@ const Modals = {
 
     confirmaRestoreLocal(filename) {
         openModal(`
-        <div class="modal-hdr" style="color:var(--orange)">Confirmar restauracao?</div>
+        <div class="modal-hdr" style="color:var(--orange)">Mesclar backup?</div>
         <div class="separador" style="background:var(--orange)"></div>
         <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:10px">Backup: ${escapeHtml(BackupService.nomeCurto(filename))}<br>Dados atuais serao SUBSTITUIDOS.</div>
+            <div class="small-note" style="margin-bottom:10px">Backup: ${escapeHtml(BackupService.nomeCurto(filename))}<br><b>Os lancamentos serao mesclados</b> — nada do que ja existe sera apagado.</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn" style="background:#C2410C" id="btn-restaurar">Restaurar</button>
+                <button class="btn btn-green" id="btn-restaurar">Mesclar</button>
             </div>
         </div>`, {
             onOpen: () => {
@@ -4764,9 +4293,10 @@ const Modals = {
                     closeModal();
                     if (res.ok) {
                         App.svc = new FinanceService(DataStore.load());
-                        Toast.ok("Backup restaurado."); App.refreshCurrent();
+                        try { FirebaseSync.scheduleSync(); } catch (_) {}
+                        Toast.ok("Backup mesclado."); App.refreshCurrent();
                     } else {
-                        Toast.erro(res.error || "Falha ao restaurar.");
+                        Toast.erro(res.error || "Falha ao mesclar.");
                     }
                 };
             }
@@ -4775,13 +4305,13 @@ const Modals = {
 
     confirmaRestoreArquivo(file) {
         openModal(`
-        <div class="modal-hdr" style="color:var(--orange)">Confirmar restauracao?</div>
+        <div class="modal-hdr" style="color:var(--orange)">Mesclar arquivo?</div>
         <div class="separador" style="background:var(--orange)"></div>
         <div class="modal-scroll">
-            <div class="small-note" style="margin-bottom:10px">Arquivo: ${escapeHtml(file.name)}<br>Dados atuais serao SUBSTITUIDOS (apenas se o arquivo for valido).</div>
+            <div class="small-note" style="margin-bottom:10px">Arquivo: ${escapeHtml(file.name)}<br><b>Os lancamentos serao mesclados</b> — nada do que ja existe sera apagado (se o arquivo for valido).</div>
             <div class="btn-row">
                 <button class="btn btn-border" id="btn-cancelar">Cancelar</button>
-                <button class="btn" style="background:#C2410C" id="btn-restaurar">Restaurar</button>
+                <button class="btn btn-green" id="btn-restaurar">Mesclar</button>
             </div>
         </div>`, {
             onOpen: () => {
@@ -4791,9 +4321,10 @@ const Modals = {
                     closeModal();
                     if (res.ok) {
                         App.svc = new FinanceService(DataStore.load());
-                        Toast.ok("Backup restaurado."); App.refreshCurrent();
+                        try { FirebaseSync.scheduleSync(); } catch (_) {}
+                        Toast.ok("Arquivo mesclado."); App.refreshCurrent();
                     } else {
-                        Toast.erro(res.error || "Falha ao restaurar. Dados atuais mantidos.");
+                        Toast.erro(res.error || "Falha ao mesclar. Dados atuais mantidos.");
                     }
                 };
             }
@@ -4805,6 +4336,7 @@ const Modals = {
         if (res.ok) { Toast.ok(`Pasta selecionada: ${res.name}`); App.refreshCurrent(); }
         else Toast.erro(res.error || "Nao foi possivel selecionar a pasta.");
     },
+
 };
 
 // ── Atualiza contagem de backups exibida no painel da Home ────────────────
@@ -4834,6 +4366,10 @@ self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => c
     navigator.serviceWorker.register(swUrl).catch(() => {});
   } catch (_) {}
 }
+
+window.addEventListener("online", () => {
+    try { if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync(); } catch (_) {}
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     App.init().catch(err => {
