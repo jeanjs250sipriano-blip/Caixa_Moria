@@ -1537,6 +1537,7 @@ const DataStore = (function () {
             data: {
                 entries: _dados.entries,
                 cultos_edicoes: _dados.cultos_edicoes,
+                cong_entries: (typeof CongService !== "undefined" && CongService._load) ? CongService._load() : [],
             },
         };
         return JSON.stringify(payload, null, 2);
@@ -1613,19 +1614,53 @@ const DataStore = (function () {
         return { ok: true };
     }
 
-    async function mergeData(novoObj) {
+    function _entryTime(e) {
+        if (!e) return 0;
+        return Date.parse(e.updatedAt || e.createdAt || "") || 0;
+    }
+
+    /** Mescla: mesmo id → updatedAt mais recente. Nunca apaga. */
+    async function mergeData(novoObj, preferIncomingOnTie) {
         const validation = validateBackup(novoObj);
         if (!validation.ok) return validation;
-        const existingIds = new Set(_dados.entries.map(e => e.id));
-        for (const e of validation.data.entries) {
-            if (!existingIds.has(e.id)) {
-                _dados.entries.push(e);
-                existingIds.add(e.id);
+        const byId = new Map();
+        for (const e of (_dados.entries || [])) {
+            if (e && e.id != null) byId.set(String(e.id), e);
+        }
+        for (const e of (validation.data.entries || [])) {
+            if (!e || e.id == null) continue;
+            const id = String(e.id);
+            const prev = byId.get(id);
+            if (!prev) { byId.set(id, e); continue; }
+            const tNew = _entryTime(e), tOld = _entryTime(prev);
+            if (tNew > tOld) byId.set(id, e);
+            else if (tNew === tOld && preferIncomingOnTie) byId.set(id, e);
+            else if (tNew === 0 && tOld === 0) {
+                try {
+                    const a = JSON.stringify([prev.desc, prev.value, prev.date, prev.type, prev.payment_type]);
+                    const b = JSON.stringify([e.desc, e.value, e.date, e.type, e.payment_type]);
+                    if (a !== b) byId.set(id, Object.assign({}, prev, e, { updatedAt: new Date().toISOString() }));
+                } catch (_) { byId.set(id, e); }
             }
         }
+        _dados.entries = Array.from(byId.values());
         for (const [mes, edicoes] of Object.entries(validation.data.cultos_edicoes || {})) {
             if (!_dados.cultos_edicoes[mes]) _dados.cultos_edicoes[mes] = {};
             Object.assign(_dados.cultos_edicoes[mes], edicoes);
+        }
+        if (validation.data.cong_entries && typeof CongService !== "undefined") {
+            try {
+                const cur = CongService._load ? CongService._load() : [];
+                const map = new Map((cur || []).map(x => [String(x.id), x]));
+                for (const c of validation.data.cong_entries) {
+                    if (!c || c.id == null) continue;
+                    const id = String(c.id);
+                    const prev = map.get(id);
+                    if (!prev) map.set(id, c);
+                    else if (_entryTime(c) >= _entryTime(prev)) map.set(id, c);
+                }
+                if (CongService._save) CongService._save(Array.from(map.values()));
+            } catch (err) { console.warn("merge cong:", err); }
         }
         await _putState(_dados);
         return { ok: true };
@@ -1747,6 +1782,7 @@ class FinanceService {
         const entry = {
             id: gerarId(), desc, value, date: dataStr, type: "entrada",
             payment_type: paymentType, dep, fixed_id: null,
+            updatedAt: new Date().toISOString(),
         };
         this.dados.entries.push(entry);
         await this._persist();
@@ -1806,8 +1842,10 @@ class FinanceService {
             if (linked) {
                 if (value !== null && value > 0) linked.value = value;
                 if (dataStr !== null && dataValida(dataStr)) linked.date = dataStr;
+                linked.updatedAt = new Date().toISOString();
             }
         }
+        target.updatedAt = new Date().toISOString();
         await this._persist();
         return true;
     }
@@ -2174,10 +2212,44 @@ const FirebaseSync = (function () {
         return "Firebase: pronto (auto-save ligado)";
     }
 
+    function _entryTime(e) {
+        if (!e) return 0;
+        return Date.parse(e.updatedAt || e.createdAt || "") || 0;
+    }
+
+    /** Mescla por id: updatedAt mais recente vence. Nunca remove ids. Local empata a favor do local. */
     function _mergeEntries(localEntries, remoteEntries) {
         const map = new Map();
-        (remoteEntries || []).forEach(e => { if (e && e.id != null) map.set(String(e.id), e); });
-        (localEntries || []).forEach(e => { if (e && e.id != null) map.set(String(e.id), e); });
+        (remoteEntries || []).forEach(e => {
+            if (e && e.id != null) map.set(String(e.id), e);
+        });
+        (localEntries || []).forEach(e => {
+            if (!e || e.id == null) return;
+            const id = String(e.id);
+            const prev = map.get(id);
+            if (!prev) { map.set(id, e); return; }
+            const tL = _entryTime(e), tR = _entryTime(prev);
+            if (tL > tR) map.set(id, e);
+            else if (tL === tR) {
+                // empate: prefere local (quem acabou de editar neste aparelho)
+                map.set(id, e);
+            } else {
+                // remoto mais novo: mantem prev
+            }
+        });
+        return Array.from(map.values());
+    }
+
+    function _mergeCong(localList, remoteList) {
+        const map = new Map();
+        (remoteList || []).forEach(e => { if (e && e.id != null) map.set(String(e.id), e); });
+        (localList || []).forEach(e => {
+            if (!e || e.id == null) return;
+            const id = String(e.id);
+            const prev = map.get(id);
+            if (!prev) map.set(id, e);
+            else if (_entryTime(e) >= _entryTime(prev)) map.set(id, e);
+        });
         return Array.from(map.values());
     }
 
@@ -2201,6 +2273,7 @@ const FirebaseSync = (function () {
                 data: {
                     entries: Array.isArray(data.entries) ? data.entries : [],
                     cultos_edicoes: data.cultos_edicoes || {},
+                    cong_entries: Array.isArray(data.cong_entries) ? data.cong_entries : [],
                     updatedAt: data.updatedAt || null
                 }
             };
@@ -2218,34 +2291,46 @@ const FirebaseSync = (function () {
             const local = DataStore.load();
             let remoteEntries = [];
             let remoteCultos = {};
+            let remoteCong = [];
             try {
                 const remote = await fetchRemote();
                 if (remote.ok && remote.data) {
                     remoteEntries = remote.data.entries || [];
                     remoteCultos = remote.data.cultos_edicoes || {};
+                    remoteCong = remote.data.cong_entries || [];
                 }
             } catch (_) {}
 
             const mergedEntries = _mergeEntries(local.entries, remoteEntries);
             const mergedCultos = _mergeCultos(local.cultos_edicoes, remoteCultos);
+            let localCong = [];
+            try { localCong = (typeof CongService !== "undefined" && CongService._load) ? CongService._load() : []; } catch (_) {}
+            const mergedCong = _mergeCong(localCong, remoteCong);
+
             const payload = {
                 entries: mergedEntries,
                 cultos_edicoes: mergedCultos,
+                cong_entries: mergedCong,
                 updatedAt: new Date().toISOString(),
                 app: "Caixa Moriah",
                 backup_version: 1
             };
+            // Backup COMPLETO na nuvem
             await docRef().set(payload);
 
-            const localIds = new Set((local.entries || []).map(e => String(e.id)));
-            const precisaLocal = mergedEntries.some(e => !localIds.has(String(e.id)));
-            if (precisaLocal) {
-                await DataStore.mergeData({
-                    backup_version: 1,
-                    app: "Caixa Moriah",
-                    data: { entries: mergedEntries, cultos_edicoes: mergedCultos }
-                });
-            }
+            // Aplica o estado mesclado no aparelho (edicoes remotas entram; nada e apagado)
+            const dados = DataStore.load();
+            dados.entries = mergedEntries;
+            dados.cultos_edicoes = mergedCultos;
+            // grava local sem re-disparar loop infinito: usa _put via mergeData envelope
+            await DataStore.mergeData({
+                backup_version: 1,
+                app: "Caixa Moriah",
+                data: { entries: mergedEntries, cultos_edicoes: mergedCultos, cong_entries: mergedCong }
+            }, true);
+            try {
+                if (typeof CongService !== "undefined" && CongService._save) CongService._save(mergedCong);
+            } catch (_) {}
 
             _lastStatus = "ok";
             _lastAt = Date.now();
@@ -2277,21 +2362,25 @@ const FirebaseSync = (function () {
             if (!remote.ok) return remote;
             if (remote.missing || !remote.data) {
                 const local = DataStore.load();
-                if (local.entries && local.entries.length) {
+                const hasLocal = (local.entries && local.entries.length) || (typeof CongService !== "undefined" && CongService._load && CongService._load().length);
+                if (hasLocal) {
                     const up = await pushNow();
                     return { ok: up.ok, applied: false, uploaded: !!up.ok, error: up.error };
                 }
                 return { ok: true, applied: false, reason: "nuvem vazia" };
             }
+            // Restaura backup completo da nuvem mesclando com local (edicoes por updatedAt)
             const r = await DataStore.mergeData({
                 backup_version: 1,
                 app: "Caixa Moriah",
                 data: {
                     entries: remote.data.entries,
-                    cultos_edicoes: remote.data.cultos_edicoes
+                    cultos_edicoes: remote.data.cultos_edicoes,
+                    cong_entries: remote.data.cong_entries || []
                 }
             });
             if (r && r.ok === false) return r;
+            // Reescreve na nuvem o estado ja mesclado (completa o que faltava)
             pushNow().catch(() => {});
             _lastStatus = "ok";
             _lastAt = Date.now();
@@ -3171,12 +3260,14 @@ const CongService = {
         const list = this._load();
         const idx = list.findIndex(e => e.id === id);
         if (idx === -1) return false;
-        list[idx] = { ...list[idx], desc, value, date: dataStr, chave: this.chaveDeData(dataStr) };
+        list[idx] = { ...list[idx], desc, value, date: dataStr, chave: this.chaveDeData(dataStr), updatedAt: new Date().toISOString() };
         this._save(list);
+        try { if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync(); } catch (_) {}
         return true;
     },
     deleteEntry(id) {
         this._save(this._load().filter(e => e.id !== id));
+        try { if (typeof FirebaseSync !== "undefined") FirebaseSync.scheduleSync(); } catch (_) {}
     },
     entriesDoMes(chave) {
         return this._load().filter(e => e.chave === chave);
