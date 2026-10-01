@@ -2165,7 +2165,7 @@ const FirebaseSync = (function () {
         appId: "1:1030892067214:web:c43dafbc35a3ef41232cdf"
     };
 
-    const DEBOUNCE_MS = 2000;
+    const DEBOUNCE_MS = 800;
     let _db = null;
     let _ready = false;
     let _timer = null;
@@ -2288,49 +2288,25 @@ const FirebaseSync = (function () {
         if (_syncing) return { ok: false, error: "Sync em andamento." };
         _syncing = true;
         try {
+            // Backup COMPLETO do estado local → sobrescreve a nuvem.
+            // Assim exclusões, edições e inclusões ficam refletidas de verdade.
             const local = DataStore.load();
-            let remoteEntries = [];
-            let remoteCultos = {};
-            let remoteCong = [];
+            let cong = [];
             try {
-                const remote = await fetchRemote();
-                if (remote.ok && remote.data) {
-                    remoteEntries = remote.data.entries || [];
-                    remoteCultos = remote.data.cultos_edicoes || {};
-                    remoteCong = remote.data.cong_entries || [];
-                }
+                cong = (typeof CongService !== "undefined" && CongService._load) ? (CongService._load() || []) : [];
             } catch (_) {}
 
-            const mergedEntries = _mergeEntries(local.entries, remoteEntries);
-            const mergedCultos = _mergeCultos(local.cultos_edicoes, remoteCultos);
-            let localCong = [];
-            try { localCong = (typeof CongService !== "undefined" && CongService._load) ? CongService._load() : []; } catch (_) {}
-            const mergedCong = _mergeCong(localCong, remoteCong);
-
             const payload = {
-                entries: mergedEntries,
-                cultos_edicoes: mergedCultos,
-                cong_entries: mergedCong,
+                entries: local.entries || [],
+                cultos_edicoes: local.cultos_edicoes || {},
+                cong_entries: cong,
                 updatedAt: new Date().toISOString(),
                 app: "Caixa Moriah",
                 backup_version: 1
             };
-            // Backup COMPLETO na nuvem
             await docRef().set(payload);
 
-            // Aplica o estado mesclado no aparelho (edicoes remotas entram; nada e apagado)
-            const dados = DataStore.load();
-            dados.entries = mergedEntries;
-            dados.cultos_edicoes = mergedCultos;
-            // grava local sem re-disparar loop infinito: usa _put via mergeData envelope
-            await DataStore.mergeData({
-                backup_version: 1,
-                app: "Caixa Moriah",
-                data: { entries: mergedEntries, cultos_edicoes: mergedCultos, cong_entries: mergedCong }
-            }, true);
-            try {
-                if (typeof CongService !== "undefined" && CongService._save) CongService._save(mergedCong);
-            } catch (_) {}
+            try { localStorage.setItem("caixa_moriah_fb_last_push", payload.updatedAt); } catch (_) {}
 
             _lastStatus = "ok";
             _lastAt = Date.now();
@@ -2360,28 +2336,43 @@ const FirebaseSync = (function () {
         try {
             const remote = await fetchRemote();
             if (!remote.ok) return remote;
+
             if (remote.missing || !remote.data) {
+                // Nuvem vazia: sobe o que tiver no aparelho
                 const local = DataStore.load();
-                const hasLocal = (local.entries && local.entries.length) || (typeof CongService !== "undefined" && CongService._load && CongService._load().length);
-                if (hasLocal) {
+                let hasCong = false;
+                try { hasCong = !!(typeof CongService !== "undefined" && CongService._load && CongService._load().length); } catch (_) {}
+                if ((local.entries && local.entries.length) || hasCong) {
                     const up = await pushNow();
                     return { ok: up.ok, applied: false, uploaded: !!up.ok, error: up.error };
                 }
                 return { ok: true, applied: false, reason: "nuvem vazia" };
             }
-            // Restaura backup completo da nuvem mesclando com local (edicoes por updatedAt)
-            const r = await DataStore.mergeData({
+
+            // Aplica o backup COMPLETO da nuvem no aparelho (inclui exclusões já gravadas).
+            // replaceData substitui entries/cultos; cong_entries tratado em seguida.
+            const envelope = {
                 backup_version: 1,
                 app: "Caixa Moriah",
+                created_at: remote.data.updatedAt || new Date().toISOString(),
                 data: {
-                    entries: remote.data.entries,
-                    cultos_edicoes: remote.data.cultos_edicoes,
+                    entries: remote.data.entries || [],
+                    cultos_edicoes: remote.data.cultos_edicoes || {},
                     cong_entries: remote.data.cong_entries || []
                 }
-            });
+            };
+            const r = await DataStore.replaceData(envelope);
             if (r && r.ok === false) return r;
-            // Reescreve na nuvem o estado ja mesclado (completa o que faltava)
-            pushNow().catch(() => {});
+
+            // Caixa local (congregacao): espelha o que está na nuvem
+            try {
+                if (typeof CongService !== "undefined" && CongService._save) {
+                    CongService._save(Array.isArray(remote.data.cong_entries) ? remote.data.cong_entries : []);
+                }
+            } catch (err) { console.warn("cong restore:", err); }
+
+            try { localStorage.setItem("caixa_moriah_fb_last_push", remote.data.updatedAt || ""); } catch (_) {}
+
             _lastStatus = "ok";
             _lastAt = Date.now();
             return { ok: true, applied: true };
